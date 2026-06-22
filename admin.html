@@ -85,7 +85,13 @@ button { color: white; border: none; padding: 10px; border-radius: 5px; cursor: 
 <svg id="pageDrawBoard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg> 
 </div> 
 <div style="display: flex; gap: 5px; margin: 3px 0 10px 0; align-items: center; justify-content: space-between;"> 
-<button type="button" style="background:#7f8c8d; padding:4px; font-size:11px; width:auto; margin:0;" onclick="clearReadingDrawBoard()">❌ റീഡിങ് വരകൾ മാറ്റുക</button> 
+<button type="button" style="background:#7f8c8d; padding:4px; font-size:11px; width:auto; margin:0;" onclick="undoLastReadingLine()">
+↩️ അവസാന വര മാറ്റുക
+</button>
+
+<button type="button" style="background:#e74c3c; padding:4px; font-size:11px; width:auto; margin:0;" onclick="clearReadingDrawBoard()">
+❌ എല്ലാം മാറ്റുക
+</button> 
 <span id="readingDrawStatus" style="font-size:11px; color:#2980b9; font-weight:bold;"></span> 
 </div> 
 <div style="background: #ebfcf2; padding: 10px; border-radius: 4px; margin: 5px 0; border: 1px solid #c3f3d7;"> 
@@ -293,10 +299,35 @@ bookImg.src = event.target.result;
 reader.readAsDataURL(selectedImageFile); 
 }); 
 function clearReadingDrawBoard() { 
-pageDrawBoard.innerHTML = ""; 
-readingPaths = []; 
-document.getElementById('readingDrawStatus').innerText = ""; 
-} 
+    document.getElementById('pageDrawBoard').innerHTML = ""; 
+    readingPaths = []; 
+    document.getElementById('readingDrawStatus').innerText = ""; 
+}
+
+
+// അവസാനത്തെ വര മാത്രം മാറ്റാൻ (Undo)
+function undoLastReadingLine() {
+
+    let board = document.getElementById('pageDrawBoard');
+
+    if(readingPaths.length === 0){
+        alert("മാറ്റാൻ വരകളൊന്നുമില്ല");
+        return;
+    }
+
+    // അവസാനം വരച്ച വര memory-ൽ നിന്ന് നീക്കുന്നു
+    readingPaths.pop();
+
+    // SVG-യിലെ അവസാനത്തെ വര നീക്കുന്നു
+    let groups = board.querySelectorAll("g");
+
+    if(groups.length > 0){
+        board.removeChild(groups[groups.length - 1]);
+    }
+
+    document.getElementById('readingDrawStatus').innerText =
+    `✏️ ബാക്കി വരകൾ: ${readingPaths.length}`;
+}
 function initReadingDrawingEngine() { 
 function getCoords(e) { 
 const rect = pageDrawBoard.getBoundingClientRect(); 
