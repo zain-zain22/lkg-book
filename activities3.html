@@ -288,7 +288,7 @@
         }
 
         function startActivityGameDirectly() {
-    // 1. അഡ്മിൻ പാനലിന്റെ പുതിയ ഘടനയനുസരിച്ച് pages ലിസ്റ്റ് സുരക്ഷിതമായി ഫിൽട്ടർ ചെയ്യുന്നു
+    // 1. അഡ്മിൻ പാനലിന്റെ ഘടനയനുസരിച്ച് pages ലിസ്റ്റ് സുരക്ഷിതമായി ഫിൽട്ടർ ചെയ്യുന്നു
     let allLivePages = [];
     if (bookData && Array.isArray(bookData.pages)) {
         allLivePages = bookData.pages.filter(p => !p.hidden && p.zones && p.zones.length > 0);
@@ -301,15 +301,17 @@
 
     quizWordsPool = [];
     
-    // 2. പാഠപുസ്തകം ടാബിലെ ഓരോ പേജിലെയും സോണുകൾ (Zones) എടുക്കുന്നു
+    // 2. ഓരോ പേജിലെയും സോണുകൾ പരിശോധിക്കുന്നു
     allLivePages.forEach(p => {
         p.zones.forEach(w => {
-            // 🔒 ടെക്സ്റ്റും (അറബിക് വാക്ക്) ഓഡിയോയും ഒരുമിച്ചുള്ളവ മാത്രം ക്വിസ്സിലേക്ക് എടുക്കുന്നു
-            if(w.text && w.text.trim() !== "" && w.audioSrc && w.audioSrc.trim() !== "") {
+            let rawAudio = w.audioSrc || "";
+            
+            // 🔒 ടെക്സ്റ്റും വോയ്സും ഒരുമിച്ചുള്ളവ മാത്രം ക്വിസ്സിലേക്ക് എടുക്കുന്നു (വോയ്സ് മാത്രമുള്ളവ ഒഴിവാക്കും)
+            if(w.text && w.text.trim() !== "" && rawAudio.trim() !== "") {
                 
                 // ഓഡിയോ പാത്ത് അഡ്മിൻ പാനൽ സേവ് ചെയ്യുമ്പോൾ വരാവുന്ന പിഴവ് സ്വയം തിരുത്തുന്നു
-                let correctAudio = w.audioSrc;
-                if (correctAudio && !correctAudio.startsWith('data/') && !correctAudio.startsWith('http')) {
+                let correctAudio = rawAudio.trim();
+                if (!correctAudio.startsWith('data/') && !correctAudio.startsWith('http')) {
                     correctAudio = 'data/' + correctAudio;
                 }
                 
@@ -346,7 +348,8 @@
 
     showScreen('activityScreen');
     generateQuizQuestion();
-}
+        }
+       
 
 
 
