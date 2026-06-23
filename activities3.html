@@ -365,7 +365,7 @@
                 // മുഴുവൻ എഴുതി തീർന്നാൽ കൃത്യം 2 സെക്കൻഡ് അവിടെ നിൽക്കും
                 setTimeout(() => {
                     finishQuizQuestion();
-                }, 2000);
+                }, 3000);
                 return;
             }
 
@@ -400,8 +400,8 @@
             handImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png");
             handImg.setAttribute("width", "180");  
             handImg.setAttribute("height", "180"); 
-            handImg.setAttribute("x", pathPoints[0].x - 25);
-            handImg.setAttribute("y", pathPoints[0].y - 155);
+            handImg.setAttribute("x", pathPoints[0].x - 33);
+            handImg.setAttribute("y", pathPoints[0].y - 50);
             svg.appendChild(handImg);
 
             let ptIdx = 1;
