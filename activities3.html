@@ -426,20 +426,20 @@
             }
             
             if(currentPointIndex === 1) {
-                handImg.setAttribute("x", pathPoints[0].x - 25);
-                handImg.setAttribute("y", pathPoints[0].y - 155);
+                handImg.setAttribute("x", pathPoints[0].x - 33);
+                handImg.setAttribute("y", pathPoints[0].y - 50);
             }
 
             // 🐢 എഴുത്തിന്റെ സ്പീഡ് കുറയ്ക്കാൻ ഈ വാല്യൂ കൂട്ടാം (12-ൽ നിന്നും 25 ആക്കി മാറ്റിയിട്ടുണ്ട്)
-            let speed = 25; 
+            let speed = 50; 
             
             if(currentPointIndex < pathPoints.length) {
                 let currPt = pathPoints[currentPointIndex];
                 let dString = ` L ${currPt.x} ${currPt.y}`;
                 paths.forEach(p => p.setAttribute("d", p.getAttribute("d") + dString));
                 
-                handImg.setAttribute("x", currPt.x - 25);
-                handImg.setAttribute("y", currPt.y - 155);
+                handImg.setAttribute("x", currPt.x - 33);
+                handImg.setAttribute("y", currPt.y - 50);
                 
                 setTimeout(() => {
                     animateQuizHandwritingSequential(pathsData, pathIndex, currentPointIndex + 1);
