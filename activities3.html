@@ -382,14 +382,14 @@
             // ✍️ പേന പിടിച്ച കൈയുടെ ചിത്രം ആഡ് ചെയ്യുന്നു
             let handImg = document.createElementNS("http://www.w3.org/2000/svg", "image");
             handImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png");
-            handImg.setAttribute("width", "150");
-            handImg.setAttribute("height", "150");
+            handImg.setAttribute("width", "200");
+            handImg.setAttribute("height", "200");
             handImg.setAttribute("x", pathPoints[0].x - 33);
             handImg.setAttribute("y", pathPoints[0].y - 50);
             svg.appendChild(handImg);
 
             let ptIdx = 1;
-            let speed = Math.max(4, Math.min(20, Math.floor(600 / pathPoints.length)));
+            let speed = Math.max(4, Math.min(20, Math.floor(3000 / pathPoints.length)));
             
             let interval = setInterval(() => {
                 if(ptIdx >= pathPoints.length) {
