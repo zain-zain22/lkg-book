@@ -355,23 +355,28 @@
         }
 
 
-                              // ✍️ എല്ലാ സ്ട്രോക്കുകളും 100% പൂർണ്ണമായി വരയ്ക്കുന്ന പുതിയ ഫങ്ക്ഷൻ
+                                      // ✍️ പഴയ അക്ഷരങ്ങൾ മായാതെ എല്ലാ സ്ട്രോക്കുകളും ഒന്നിച്ച് നിലനിർത്തി വരയ്ക്കുന്ന ഫങ്ക്ഷൻ
         function animateQuizHandwritingSequential(pathsData, pathIndex) {
             let svg = document.getElementById('quizWriteEngine');
-            if(pathIndex === 0) svg.innerHTML = ""; // ആദ്യം തുടങ്ങുമ്പോൾ പഴയത് ക്ലിയർ ചെയ്യുക
+            
+            // 💡 മാറ്റം വരുത്തിയത് ഇവിടെയാണ്:
+            // ഏറ്റവും ആദ്യത്തെ സ്ട്രോക്ക് (pathIndex === 0) ആണെങ്കിൽ മാത്രം പഴയത് ക്ലിയർ ചെയ്യും.
+            // അതുകൊണ്ട് രണ്ടാമത്തെ അക്ഷരം എഴുതുമ്പോൾ ആദ്യത്തേത് മാഞ്ഞുപോകില്ല!
+            if(pathIndex === 0) {
+                svg.innerHTML = ""; 
+            }
 
-            // 🛑 സുരക്ഷാ ചെക്ക്: എല്ലാ സ്ട്രോക്കുകളും വരച്ചു കഴിഞ്ഞാൽ നിർത്തുക
+            // 🛑 എല്ലാ സ്ട്രോക്കുകളും വരച്ചു കഴിഞ്ഞാൽ 2 സെക്കൻഡ് അവിടെ നിൽക്കും
             if(pathIndex >= pathsData.length) {
-                // മുഴുവൻ എഴുതി തീർന്നാൽ കൃത്യം 2 സെക്കൻഡ് അവിടെ നിൽക്കും
                 setTimeout(() => {
                     finishQuizQuestion();
-                }, 3000);
+                }, 2000);
                 return;
             }
 
             let pathPoints = pathsData[pathIndex];
             
-            // 🔍 പാത്ത് ഡാറ്റാ ശരിയല്ലെങ്കിലോ പോയിന്റുകൾ ഇല്ലെങ്കിലോ അടുത്ത സ്ട്രോക്കിലേക്ക് തനിയെ പോകും
+            // പാത്ത് ഡാറ്റാ ശരിയല്ലെങ്കിൽ അടുത്ത സ്ട്രോക്കിലേക്ക് പോകും
             if(!pathPoints || !Array.isArray(pathPoints) || pathPoints.length === 0) {
                 animateQuizHandwritingSequential(pathsData, pathIndex + 1);
                 return;
@@ -405,10 +410,9 @@
             svg.appendChild(handImg);
 
             let ptIdx = 1;
-            let speed = 30; // സ്മൂത്ത് ആകാനുള്ള സ്പീഡ് (15ms)
+            let speed = 30; // എഴുത്തിന്റെ സ്മൂത്ത് സ്പീഡ്
             
             let interval = setInterval(() => {
-                // 🔒 ഈ സ്ട്രോക്കിലെ അവസാന പോയിന്റും വരച്ചു എന്ന് ഉറപ്പാക്കുന്നു
                 if(ptIdx >= pathPoints.length) {
                     clearInterval(interval);
                     
@@ -420,7 +424,7 @@
                     // ഈ ലൈൻ കഴിഞ്ഞാൽ കൈ മാറ്റുക
                     if(handImg && handImg.parentNode) handImg.parentNode.removeChild(handImg); 
                     
-                    // ➡️ ഒട്ടും വൈകാതെ അടുത്ത സ്ട്രോക്ക് വരയ്ക്കാൻ തുടങ്ങുക
+                    // ➡️ ആദ്യത്തെ അക്ഷരം നിലനിർത്തിക്കൊണ്ട് തന്നെ അടുത്ത സ്ട്രോക്ക് വരയ്ക്കാൻ തുടങ്ങുന്നു
                     animateQuizHandwritingSequential(pathsData, pathIndex + 1);
                     return;
                 }
@@ -435,6 +439,7 @@
                 ptIdx++;
             }, speed);
         }
+
 
 
 
