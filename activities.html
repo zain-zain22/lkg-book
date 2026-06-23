@@ -304,17 +304,17 @@
     // 2. പാഠപുസ്തകം ടാബിലെ ഓരോ പേജിലെയും സോണുകൾ (Zones) എടുക്കുന്നു
     allLivePages.forEach(p => {
         p.zones.forEach(w => {
-            // വാക്കിന് അറബിക് ടെക്സ്റ്റോ ഓഡിയോയോ ഉണ്ടെങ്കിൽ അത് ക്വിസ് പൂളിലേക്ക് മാറ്റുന്നു
-            if((w.text && w.text.trim() !== "") || w.audioSrc) {
+            // 🔒 ടെക്സ്റ്റും (അറബിക് വാക്ക്) ഓഡിയോയും ഒരുമിച്ചുള്ളവ മാത്രം ക്വിസ്സിലേക്ക് എടുക്കുന്നു
+            if(w.text && w.text.trim() !== "" && w.audioSrc && w.audioSrc.trim() !== "") {
                 
-                // 🔒 ഓഡിയോ പാത്ത് അഡ്മിൻ പാനൽ സേവ് ചെയ്യുമ്പോൾ വരാവുന്ന പിഴവ് സ്വയം തിരുത്തുന്നു
-                let correctAudio = w.audioSrc || "";
+                // ഓഡിയോ പാത്ത് അഡ്മിൻ പാനൽ സേവ് ചെയ്യുമ്പോൾ വരാവുന്ന പിഴവ് സ്വയം തിരുത്തുന്നു
+                let correctAudio = w.audioSrc;
                 if (correctAudio && !correctAudio.startsWith('data/') && !correctAudio.startsWith('http')) {
                     correctAudio = 'data/' + correctAudio;
                 }
                 
                 quizWordsPool.push({
-                    text: w.text ? w.text.trim() : "🔊 കേൾക്കുക",
+                    text: w.text.trim(),
                     audioSrc: correctAudio,
                     lesson: p.lesson || 1,
                     writingPaths: w.writingPaths || null 
@@ -324,7 +324,7 @@
     });
 
     if(quizWordsPool.length === 0) {
-        alert("⚠️ പാഠപുസ്തകത്തിലെ വാക്കുകളിൽ ഓഡിയോയോ ടെക്സ്റ്റോ ലഭ്യമല്ല!");
+        alert("⚠️ പാഠപുസ്തകത്തിൽ ടെക്സ്റ്റും ഓഡിയോയും ഒരുമിച്ചുള്ള വാക്കുകൾ ഒന്നും ലഭ്യമല്ല!");
         return;
     }
 
@@ -347,6 +347,7 @@
     showScreen('activityScreen');
     generateQuizQuestion();
 }
+
 
 
         function stopActivityGameTimer() {
