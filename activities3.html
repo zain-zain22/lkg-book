@@ -290,8 +290,8 @@
         function startActivityGameDirectly() {
     let allLivePages = [];
     
-    // 🔒 ഡാറ്റാ ഘടനയിലെ വ്യത്യാസങ്ങൾ സുരക്ഷിതമായി ഫിൽട്ടർ ചെയ്യുന്നു
-    if (bookData) {
+    // 🔒 ഇവിടെ bookData എന്ന സ്പെല്ലിംഗ് കൃത്യമാക്കി സുരക്ഷിതമായി ഫിൽട്ടർ ചെയ്യുന്നു
+    if (typeof bookData !== 'undefined' && bookData) {
         if (Array.isArray(bookData.pages)) {
             allLivePages = bookData.pages.filter(p => !p.hidden && p.zones && p.zones.length > 0);
         } else if (Array.isArray(bookData)) {
@@ -352,6 +352,7 @@
     showScreen('activityScreen');
     generateQuizQuestion();
 }
+
 
 
 
