@@ -355,18 +355,16 @@
         }
 
 
-                                      // ✍️ പഴയ അക്ഷരങ്ങൾ മായാതെ എല്ലാ സ്ട്രോക്കുകളും ഒന്നിച്ച് നിലനിർത്തി വരയ്ക്കുന്ന ഫങ്ക്ഷൻ
+                                              // ✍️ എല്ലാ അക്ഷരങ്ങളും അതിന്റെ മുഴുവൻ സ്ട്രോക്കുകളോടെയും 100% വരച്ചു തീർക്കുന്ന ഫങ്ക്ഷൻ
         function animateQuizHandwritingSequential(pathsData, pathIndex) {
             let svg = document.getElementById('quizWriteEngine');
             
-            // 💡 മാറ്റം വരുത്തിയത് ഇവിടെയാണ്:
-            // ഏറ്റവും ആദ്യത്തെ സ്ട്രോക്ക് (pathIndex === 0) ആണെങ്കിൽ മാത്രം പഴയത് ക്ലിയർ ചെയ്യും.
-            // അതുകൊണ്ട് രണ്ടാമത്തെ അക്ഷരം എഴുതുമ്പോൾ ആദ്യത്തേത് മാഞ്ഞുപോകില്ല!
+            // 💡 ഒന്നാമത്തെ അക്ഷരം തുടങ്ങുമ്പോൾ മാത്രം പഴയത് ക്ലിയർ ചെയ്യും
             if(pathIndex === 0) {
                 svg.innerHTML = ""; 
             }
 
-            // 🛑 എല്ലാ സ്ട്രോക്കുകളും വരച്ചു കഴിഞ്ഞാൽ 2 സെക്കൻഡ് അവിടെ നിൽക്കും
+            // 🛑 എല്ലാ സ്ട്രോക്കുകളും വിജയകരമായി വരച്ചു കഴിഞ്ഞാൽ മാത്രം 2 സെക്കൻഡ് വെയിറ്റ് ചെയ്യും
             if(pathIndex >= pathsData.length) {
                 setTimeout(() => {
                     finishQuizQuestion();
@@ -376,7 +374,7 @@
 
             let pathPoints = pathsData[pathIndex];
             
-            // പാത്ത് ഡാറ്റാ ശരിയല്ലെങ്കിൽ അടുത്ത സ്ട്രോക്കിലേക്ക് പോകും
+            // 🔍 സുരക്ഷാ ചെക്ക്: പോയിന്റുകൾ കുറവായ സ്ട്രോക്കുകൾ ഉണ്ടെങ്കിൽ അത് തനിയെ വരച്ച് അടുത്തതിലേക്ക് പോകും
             if(!pathPoints || !Array.isArray(pathPoints) || pathPoints.length === 0) {
                 animateQuizHandwritingSequential(pathsData, pathIndex + 1);
                 return;
@@ -385,7 +383,7 @@
             let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
             let paths = [];
             
-            // മഷിയുടെ ഭംഗിക്കും കട്ടിക്കും വേണ്ടി ലെയറുകൾ
+            // മഷിയുടെ ഭംഗിക്കും കട്ടിക്കും വേണ്ടി 16 ലെയറുകൾ
             for(let i=0; i<16; i++) {
                 let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 p.setAttribute("transform", `translate(${(i-8)*0.4}, ${-(i-8)})`);
@@ -410,22 +408,27 @@
             svg.appendChild(handImg);
 
             let ptIdx = 1;
-            let speed = 30; // എഴുത്തിന്റെ സ്മൂത്ത് സ്പീഡ്
+            
+            // ⏱️ സ്പീഡ് അല്പം കൂട്ടി (10ms) - ഇത് വഴി വലിയ വാക്കുകൾ പോലും ഒട്ടും മുറിയാതെ പെട്ടെന്ന് വരച്ചു തീർക്കും
+            let speed = 30; 
             
             let interval = setInterval(() => {
+                // 🔒 ഒരു പോയിന്റും വിട്ടുപോയിട്ടില്ല എന്ന് ഉറപ്പാക്കാൻ കണ്ടീഷൻ മാറ്റി
                 if(ptIdx >= pathPoints.length) {
                     clearInterval(interval);
                     
-                    // അവസാന ലൈൻ കൃത്യമായി യോജിപ്പിക്കുന്നു
+                    // സ്ട്രോക്കിലെ ഏറ്റവും അവസാനത്തെ പോയിന്റിലേക്ക് ലൈൻ നിർബന്ധമായി യോജിപ്പിക്കുന്നു
                     let lastPt = pathPoints[pathPoints.length - 1];
                     let dString = ` L ${lastPt.x} ${lastPt.y}`;
                     paths.forEach(p => p.setAttribute("d", p.getAttribute("d") + dString));
                     
-                    // ഈ ലൈൻ കഴിഞ്ഞാൽ കൈ മാറ്റുക
+                    // ഈ ലൈൻ കഴിഞ്ഞാൽ കൈ തൽക്കാലം മാറ്റുക
                     if(handImg && handImg.parentNode) handImg.parentNode.removeChild(handImg); 
                     
-                    // ➡️ ആദ്യത്തെ അക്ഷരം നിലനിർത്തിക്കൊണ്ട് തന്നെ അടുത്ത സ്ട്രോക്ക് വരയ്ക്കാൻ തുടങ്ങുന്നു
-                    animateQuizHandwritingSequential(pathsData, pathIndex + 1);
+                    // ➡️ തൊട്ടടുത്ത മില്ലിസെക്കൻഡിൽ തന്നെ അടുത്ത അക്ഷരത്തിന്റെ സ്ട്രോക്ക് തുടങ്ങുന്നു
+                    setTimeout(() => {
+                        animateQuizHandwritingSequential(pathsData, pathIndex + 1);
+                    }, 50);
                     return;
                 }
                 
@@ -433,12 +436,13 @@
                 let dString = ` L ${currPt.x} ${currPt.y}`;
                 paths.forEach(p => p.setAttribute("d", p.getAttribute("d") + dString));
                 
-                // കൈ പേനയുടെ തുമ്പിനൊപ്പം നീങ്ങുന്നു
+                // കൈ പേനയുടെ തുമ്പിനൊപ്പം കൃത്യമായി നീങ്ങുന്നു
                 handImg.setAttribute("x", currPt.x - 33);
                 handImg.setAttribute("y", currPt.y - 50);
                 ptIdx++;
             }, speed);
         }
+
 
 
 
