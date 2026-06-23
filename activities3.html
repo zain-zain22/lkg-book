@@ -354,18 +354,21 @@
             }
         }
 
-
-                                              // ✍️ എല്ലാ അക്ഷരങ്ങളും അതിന്റെ മുഴുവൻ സ്ട്രോക്കുകളോടെയും 100% വരച്ചു തീർക്കുന്ന ഫങ്ക്ഷൻ
-        function animateQuizHandwritingSequential(pathsData, pathIndex) {
+        // ✍️ ഒരു പോയിന്റും വിടാതെ മുഴുവൻ വരച്ചു തീർത്ത ശേഷം മാത്രം അടുത്ത ചോദ്യത്തിലേക്ക് പോകുന്ന ഫങ്ക്ഷൻ
+        function animateQuizHandwritingSequential(pathsData, pathIndex, currentPointIndex = 1) {
             let svg = document.getElementById('quizWriteEngine');
             
-            // 💡 ഒന്നാമത്തെ അക്ഷരം തുടങ്ങുമ്പോൾ മാത്രം പഴയത് ക്ലിയർ ചെയ്യും
-            if(pathIndex === 0) {
+            // 💡 ഒന്നാമത്തെ അക്ഷരത്തിന്റെ ആദ്യത്തെ വര തുടങ്ങുമ്പോൾ മാത്രം പഴയത് ക്ലിയർ ചെയ്യും
+            if(pathIndex === 0 && currentPointIndex === 1) {
                 svg.innerHTML = ""; 
             }
 
-            // 🛑 എല്ലാ സ്ട്രോക്കുകളും വിജയകരമായി വരച്ചു കഴിഞ്ഞാൽ മാത്രം 2 സെക്കൻഡ് വെയിറ്റ് ചെയ്യും
+            // 🛑 ഡാറ്റയിലുള്ള എല്ലാ സ്ട്രോക്കുകളും (അക്ഷരങ്ങൾ/ചിഹ്നങ്ങൾ) പൂർണ്ണമായി കഴിഞ്ഞോ എന്ന് നോക്കുന്നു
             if(pathIndex >= pathsData.length) {
+                let oldHand = svg.querySelector('image');
+                if(oldHand) oldHand.parentNode.removeChild(oldHand);
+
+                // ⏱️ എല്ലാ അക്ഷരങ്ങളും സ്ക്രീനിൽ 100% വന്നു കഴിഞ്ഞാണ് ഈ 2 സെക്കൻഡ് വെയിറ്റിംഗ് തുടങ്ങുന്നത്!
                 setTimeout(() => {
                     finishQuizQuestion();
                 }, 2000);
@@ -374,74 +377,80 @@
 
             let pathPoints = pathsData[pathIndex];
             
-            // 🔍 സുരക്ഷാ ചെക്ക്: പോയിന്റുകൾ കുറവായ സ്ട്രോക്കുകൾ ഉണ്ടെങ്കിൽ അത് തനിയെ വരച്ച് അടുത്തതിലേക്ക് പോകും
+            // 🔍 പാത്ത് ശരിയല്ലെങ്കിൽ അടുത്ത സ്ട്രോക്കിലേക്ക് പോകുന്നു
             if(!pathPoints || !Array.isArray(pathPoints) || pathPoints.length === 0) {
-                animateQuizHandwritingSequential(pathsData, pathIndex + 1);
+                animateQuizHandwritingSequential(pathsData, pathIndex + 1, 1);
                 return;
             }
 
-            let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            // ഒരു സ്ട്രോക്കിന്റെ തുടക്കമാണെങ്കിൽ മാത്രം പുതിയൊരു ഗ്രൂപ്പും പാത്തും ഉണ്ടാക്കുന്നു
+            let g = svg.getElementById(`stroke-g-${pathIndex}`);
             let paths = [];
             
-            // മഷിയുടെ ഭംഗിക്കും കട്ടിക്കും വേണ്ടി 16 ലെയറുകൾ
-            for(let i=0; i<16; i++) {
-                let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                p.setAttribute("transform", `translate(${(i-8)*0.4}, ${-(i-8)})`);
-                p.setAttribute("stroke", "#e74c3c"); 
-                p.setAttribute("stroke-width", "3");
-                p.setAttribute("fill", "none");
-                p.setAttribute("stroke-linecap", "round");
-                p.setAttribute("stroke-linejoin", "round");
-                p.setAttribute("d", `M ${pathPoints[0].x} ${pathPoints[0].y}`);
-                g.appendChild(p);
-                paths.push(p);
-            }
-            svg.appendChild(g);
+            if(currentPointIndex === 1) {
+                // മുൻപ് ഉണ്ടായിരുന്ന കൈ മാറ്റുക
+                let existingHand = svg.querySelector('image');
+                if(existingHand) existingHand.parentNode.removeChild(existingHand);
 
-            // ✍️ പേന പിടിച്ച കൈയുടെ ചിത്രം
-            let handImg = document.createElementNS("http://www.w3.org/2000/svg", "image");
-            handImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png");
-            handImg.setAttribute("width", "180");  
-            handImg.setAttribute("height", "180"); 
-            handImg.setAttribute("x", pathPoints[0].x - 33);
-            handImg.setAttribute("y", pathPoints[0].y - 50);
-            svg.appendChild(handImg);
-
-            let ptIdx = 1;
-            
-            // ⏱️ സ്പീഡ് അല്പം കൂട്ടി (10ms) - ഇത് വഴി വലിയ വാക്കുകൾ പോലും ഒട്ടും മുറിയാതെ പെട്ടെന്ന് വരച്ചു തീർക്കും
-            let speed = 30; 
-            
-            let interval = setInterval(() => {
-                // 🔒 ഒരു പോയിന്റും വിട്ടുപോയിട്ടില്ല എന്ന് ഉറപ്പാക്കാൻ കണ്ടീഷൻ മാറ്റി
-                if(ptIdx >= pathPoints.length) {
-                    clearInterval(interval);
-                    
-                    // സ്ട്രോക്കിലെ ഏറ്റവും അവസാനത്തെ പോയിന്റിലേക്ക് ലൈൻ നിർബന്ധമായി യോജിപ്പിക്കുന്നു
-                    let lastPt = pathPoints[pathPoints.length - 1];
-                    let dString = ` L ${lastPt.x} ${lastPt.y}`;
-                    paths.forEach(p => p.setAttribute("d", p.getAttribute("d") + dString));
-                    
-                    // ഈ ലൈൻ കഴിഞ്ഞാൽ കൈ തൽക്കാലം മാറ്റുക
-                    if(handImg && handImg.parentNode) handImg.parentNode.removeChild(handImg); 
-                    
-                    // ➡️ തൊട്ടടുത്ത മില്ലിസെക്കൻഡിൽ തന്നെ അടുത്ത അക്ഷരത്തിന്റെ സ്ട്രോക്ക് തുടങ്ങുന്നു
-                    setTimeout(() => {
-                        animateQuizHandwritingSequential(pathsData, pathIndex + 1);
-                    }, 50);
-                    return;
-                }
+                g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+                g.setAttribute("id", `stroke-g-${pathIndex}`);
                 
-                let currPt = pathPoints[ptIdx];
+                for(let i=0; i<16; i++) {
+                    let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                    p.setAttribute("transform", `translate(${(i-8)*0.4}, ${-(i-8)})`);
+                    p.setAttribute("stroke", "#e74c3c"); 
+                    p.setAttribute("stroke-width", "3");
+                    p.setAttribute("fill", "none");
+                    p.setAttribute("stroke-linecap", "round");
+                    p.setAttribute("stroke-linejoin", "round");
+                    p.setAttribute("d", `M ${pathPoints[0].x} ${pathPoints[0].y}`);
+                    g.appendChild(p);
+                }
+                svg.appendChild(g);
+            }
+
+            // നിലവിലുള്ള പാത്തുകൾ സെലക്ട് ചെയ്യുന്നു
+            if(g) {
+                paths = Array.from(g.querySelectorAll('path'));
+            }
+
+            // ✍️ കൈയുടെ ചിത്രം ഉണ്ടെങ്കിൽ എടുക്കുക, ഇല്ലെങ്കിൽ പുതിയത് ഉണ്ടാക്കുക
+            let handImg = svg.querySelector('image');
+            if(!handImg) {
+                handImg = document.createElementNS("http://www.w3.org/2000/svg", "image");
+                handImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png");
+                handImg.setAttribute("width", "180");  
+                handImg.setAttribute("height", "180"); 
+                svg.appendChild(handImg);
+            }
+            
+            // കൈ ആദ്യ പോയിന്റിലേക്ക് വെക്കുന്നു
+            if(currentPointIndex === 1) {
+                handImg.setAttribute("x", pathPoints[0].x - 33);
+                handImg.setAttribute("y", pathPoints[0].y - 55);
+            }
+
+            let speed = 12; // എഴുത്തിന്റെ സ്മൂത്ത് സ്പീഡ്
+            
+            // 💡 വലിയ ലൂപ്പുകൾക്ക് പകരം കൃത്യമായ പോയിന്റ് ട്രാക്കിംഗ് (പകുതിക്ക് വെച്ച് കട്ട് ആകില്ല)
+            if(currentPointIndex < pathPoints.length) {
+                let currPt = pathPoints[currentPointIndex];
                 let dString = ` L ${currPt.x} ${currPt.y}`;
                 paths.forEach(p => p.setAttribute("d", p.getAttribute("d") + dString));
                 
-                // കൈ പേനയുടെ തുമ്പിനൊപ്പം കൃത്യമായി നീങ്ങുന്നു
                 handImg.setAttribute("x", currPt.x - 33);
-                handImg.setAttribute("y", currPt.y - 50);
-                ptIdx++;
-            }, speed);
+                handImg.setAttribute("y", currPt.y - 55);
+                
+                // അടുത്ത പോയിന്റ് വരയ്ക്കാൻ ഫങ്ക്ഷൻ വീണ്ടും കോൾ ചെയ്യുന്നു
+                setTimeout(() => {
+                    animateQuizHandwritingSequential(pathsData, pathIndex, currentPointIndex + 1);
+                }, speed);
+            } else {
+                // ഈ സ്ട്രോക്കിലെ അവസാന പോയിന്റും കഴിഞ്ഞാൽ ഒട്ടും വൈകാതെ അടുത്ത സ്ട്രോക്കിലേക്ക് (അടുത്ത അക്ഷരം) കടക്കുന്നു
+                animateQuizHandwritingSequential(pathsData, pathIndex + 1, 1);
+            }
         }
+
 
 
 
