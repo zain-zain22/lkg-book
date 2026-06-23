@@ -206,7 +206,7 @@
         function enterToMainMenu() {
             currentMadrasa = document.getElementById('madrasaSelect').value;
             currentStudent = document.getElementById('studentSelect').value;
-            if(!currentMadrasa || !currentStudent || currentMadrasa === "ഡാറ്റ ലഭ്യമല്ല") return alert("വിവരങ്ങൾ തിരഞ്ഞെടുക്കുക!");
+            if(!currentMadrasa || !currentStudent || currentMadrasa === "ഡാറ്റ ലഭ്യമല്ല") return alert("വി വിവരങ്ങൾ തിരഞ്ഞെടുക്കുക!");
             
             document.getElementById('welcomeText').innerText = `👤 ${currentStudent}`;
             
@@ -313,34 +313,20 @@
             player.play();
         }
 
-                function checkQuizAnswer(selectedText, btnElement) {
+        function checkQuizAnswer(selectedText, btnElement) {
             document.getElementById('quizOptionsContainer').classList.add('zones-disabled');
             
             if(selectedText === correctQuizZone.text.trim()) {
                 btnElement.style.background = "#2ecc71";
                 document.getElementById('quizCanvasPlaceholder').style.display = "none";
                 
-                // ✍️ ഹാൻഡ് റൈറ്റിംഗ് ആനിമേഷൻ തുടർച്ചയായി പ്രവർത്തിപ്പിക്കുന്നു
+                // ✍️ അനിമേഷൻ ഒരൊറ്റ ഫങ്ക്ഷൻ വഴി സുരക്ഷിതമായി റൺ ചെയ്യുന്നു (ലാഗ് ഫിക്സഡ്)
                 if(correctQuizZone.writingPaths && correctQuizZone.writingPaths.length > 0) {
-                    animateQuizHandwritingSequential(correctQuizZone.writingPaths, 0);
+                    animateQuizHandwritingSequential(correctQuizZone.writingPaths, 0, 1);
+                } else {
+                    // പാത്ത് ഫയലുകൾ ഇല്ലെങ്കിൽ നേരിട്ട് അടുത്ത ചോദ്യത്തിലേക്ക് പോകും
+                    setTimeout(() => { finishQuizQuestion(); }, 1500);
                 }
-                
-                // 💡 മാറ്റം വരുത്തിയത് ഇവിടെയാണ്:
-                // ആനിമേഷൻ തീരുന്ന സമയവും + നമ്മൾ ഉദ്ദേശിക്കുന്ന 2 സെക്കൻഡും കണക്കാക്കി 
-                // അടുത്ത ചോദ്യം ലോഡ് ചെയ്യുന്നത് അല്പം വൈകിപ്പിച്ചു.
-                let totalDelay = 3000; // 2 സെക്കൻഡ് സ്ഥിരമായി അവിടെ നിൽക്കാൻ
-                
-                setTimeout(() => {
-                    currentQuizIdx++;
-                    if(currentQuizIdx < quizPool.length) {
-                        loadQuizQuestion();
-                    } else {
-                        // 🎉 വിജയിച്ചു - ടൈമർ നിർത്തുക, സർട്ടിഫിക്കറ്റ് കാണിക്കുക
-                        clearInterval(scoreInterval);
-                        localStorage.setItem(`score_${currentStudent}`, gameScore);
-                        generateCertificate();
-                    }
-                }, totalDelay); // 👈 2 സെക്കൻഡ് കഴിഞ്ഞേ അടുത്ത ചോദ്യത്തിലേക്ക് പോകൂ
             } else {
                 // ❌ തെറ്റിയാൽ ഗെയിം ഓവർ!
                 btnElement.style.background = "#e74c3c";
@@ -349,7 +335,7 @@
                 gameScore = Math.max(0, gameScore - 10);
                 localStorage.setItem(`score_${currentStudent}`, gameScore);
                 
-                alert("❌ ഉത്തരം തെറ്റാണ്!  സാരമില്ല. 10 പോയിന്റ് നഷ്ടമായി. വീണ്ടും ലോഗിൻ ചെയ്ത് ആദ്യമേ ശ്രമിക്കൂ!");
+                alert("❌ ഉത്തരം തെറ്റാണ്! സാരമില്ല. 10 പോയിന്റ് നഷ്ടമായി. വീണ്ടും ലോഗിൻ ചെയ്ത് ആദ്യമേ ശ്രമിക്കൂ!");
                 showScreen('loginScreen');
             }
         }
@@ -363,12 +349,12 @@
                 svg.innerHTML = ""; 
             }
 
-            // 🛑 ഡാറ്റയിലുള്ള എല്ലാ സ്ട്രോക്കുകളും (അക്ഷരങ്ങൾ/ചിഹ്നങ്ങൾ) പൂർണ്ണമായി കഴിഞ്ഞോ എന്ന് നോക്കുന്നു
+            // 🛑 ഡാറ്റയിലുള്ള എല്ലാ സ്ട്രോക്കുകളും പൂർണ്ണമായി കഴിഞ്ഞാൽ കൈ മാറ്റി 2 സെക്കൻഡ് വെയിറ്റ് ചെയ്യും
             if(pathIndex >= pathsData.length) {
                 let oldHand = svg.querySelector('image');
                 if(oldHand) oldHand.parentNode.removeChild(oldHand);
 
-                // ⏱️ എല്ലാ അക്ഷരങ്ങളും സ്ക്രീനിൽ 100% വന്നു കഴിഞ്ഞാണ് ഈ 2 സെക്കൻഡ് വെയിറ്റിംഗ് തുടങ്ങുന്നത്!
+                // ⏱️ എല്ലാ അക്ഷരങ്ങളും ചിഹ്നങ്ങളും 100% പൂർത്തിയായ ശേഷമാണ് ഈ 2 സെക്കൻഡ് വെയിറ്റിംഗ് ആരംഭിക്കുക!
                 setTimeout(() => {
                     finishQuizQuestion();
                 }, 2000);
@@ -377,7 +363,7 @@
 
             let pathPoints = pathsData[pathIndex];
             
-            // 🔍 പാത്ത് ശരിയല്ലെങ്കിൽ അടുത്ത സ്ട്രോക്കിലേക്ക് പോകുന്നു
+            // 🔍 പാത്ത് ശരിയല്ലെങ്കിൽ അടുത്ത സ്ട്രോക്കിലേക്ക് സ്കിപ്പ് ചെയ്യുന്നു
             if(!pathPoints || !Array.isArray(pathPoints) || pathPoints.length === 0) {
                 animateQuizHandwritingSequential(pathsData, pathIndex + 1, 1);
                 return;
@@ -395,6 +381,7 @@
                 g = document.createElementNS("http://www.w3.org/2000/svg", "g");
                 g.setAttribute("id", `stroke-g-${pathIndex}`);
                 
+                // കാലിഗ്രാഫി ഭംഗിക്ക് വേണ്ടിയുള്ള സ്ട്രോക്കുകൾ
                 for(let i=0; i<16; i++) {
                     let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
                     p.setAttribute("transform", `translate(${(i-8)*0.4}, ${-(i-8)})`);
@@ -419,43 +406,50 @@
             if(!handImg) {
                 handImg = document.createElementNS("http://www.w3.org/2000/svg", "image");
                 handImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png");
-                handImg.setAttribute("width", "180");  
+                handImg.setAttribute("width", "180");  // വലിപ്പം 180 ആക്കി കൂട്ടിയിട്ടുണ്ട്
                 handImg.setAttribute("height", "180"); 
                 svg.appendChild(handImg);
             }
             
-            // കൈ ആദ്യ പോയിന്റിലേക്ക് വെക്കുന്നു
+            // കൈ പേനയുടെ നിബ്ബിനൊപ്പം ആദ്യ പോയിന്റിലേക്ക് വെക്കുന്നു
             if(currentPointIndex === 1) {
-                handImg.setAttribute("x", pathPoints[0].x - 33);
-                handImg.setAttribute("y", pathPoints[0].y - 55);
+                handImg.setAttribute("x", pathPoints[0].x - 25);
+                handImg.setAttribute("y", pathPoints[0].y - 155);
             }
 
-            let speed = 12; // എഴുത്തിന്റെ സ്മൂത്ത് സ്പീഡ്
+            let speed = 12; // എഴുത്തിന്റെ സ്മൂത്ത് സ്പീഡ് (ടൈം-ലൂപ്പ് സ്റ്റേബിൾ ആക്കാൻ)
             
-            // 💡 വലിയ ലൂപ്പുകൾക്ക് പകരം കൃത്യമായ പോയിന്റ് ട്രാക്കിംഗ് (പകുതിക്ക് വെച്ച് കട്ട് ആകില്ല)
+            // 💡 വലിയ ലൂപ്പുകൾക്ക് പകരം കൃത്യമായ പോയിന്റ് ട്രാക്കിംഗ് (പകുതിക്ക് വെച്ച് അടുത്ത ചോദ്യത്തിലേക്ക് പോകില്ല)
             if(currentPointIndex < pathPoints.length) {
                 let currPt = pathPoints[currentPointIndex];
                 let dString = ` L ${currPt.x} ${currPt.y}`;
                 paths.forEach(p => p.setAttribute("d", p.getAttribute("d") + dString));
                 
-                handImg.setAttribute("x", currPt.x - 33);
-                handImg.setAttribute("y", currPt.y - 55);
+                handImg.setAttribute("x", currPt.x - 25);
+                handImg.setAttribute("y", currPt.y - 155);
                 
                 // അടുത്ത പോയിന്റ് വരയ്ക്കാൻ ഫങ്ക്ഷൻ വീണ്ടും കോൾ ചെയ്യുന്നു
                 setTimeout(() => {
                     animateQuizHandwritingSequential(pathsData, pathIndex, currentPointIndex + 1);
                 }, speed);
             } else {
-                // ഈ സ്ട്രോക്കിലെ അവസാന പോയിന്റും കഴിഞ്ഞാൽ ഒട്ടും വൈകാതെ അടുത്ത സ്ട്രോക്കിലേക്ക് (അടുത്ത അക്ഷരം) കടക്കുന്നു
+                // ഈ സ്ട്രോക്കിലെ അവസാന പോയിന്റും കഴിഞ്ഞാൽ ഒട്ടും വൈകാതെ അടുത്ത സ്ട്രോക്കിലേക്ക് കടക്കുന്നു
                 animateQuizHandwritingSequential(pathsData, pathIndex + 1, 1);
             }
         }
 
-
-
-
-
-
+        // ➡️ അടുത്ത ചോദ്യത്തിലേക്ക് പോകാൻ സഹായിക്കുന്ന ഫങ്ക്ഷൻ
+        function finishQuizQuestion() {
+            currentQuizIdx++;
+            if(currentQuizIdx < quizPool.length) {
+                loadQuizQuestion();
+            } else {
+                // 🎉 വിജയിച്ചു - ടൈമർ നിർത്തുക, സർട്ടിഫിക്കറ്റ് കാണിക്കുക
+                clearInterval(scoreInterval);
+                localStorage.setItem(`score_${currentStudent}`, gameScore);
+                generateCertificate();
+            }
+        }
 
         // 🏆 സർട്ടിഫിക്കറ്റ് ജനറേറ്റ് ചെയ്യുന്ന ഫങ്ക്ഷൻ
         function generateCertificate() {
@@ -468,7 +462,7 @@
             let today = new Date();
             let dateString = `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`;
 
-            // ഡാറ്റാ ബുക്കിലെ വിവരങ്ങൾ (അഡ്മിൻ പാനലിൽ നിന്നുള്ളത്)
+            // ഡാറ്റാ ബുക്കിലെ വിവരങ്ങൾ
             document.getElementById('certStudentName').innerText = currentStudent;
             document.getElementById('certMadrasaName').innerText = currentMadrasa;
             document.getElementById('certSubject').innerText = bookData.subject || "അറബിക്";
