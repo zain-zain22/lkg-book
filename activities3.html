@@ -313,7 +313,7 @@
             player.play();
         }
 
-        function checkQuizAnswer(selectedText, btnElement) {
+                function checkQuizAnswer(selectedText, btnElement) {
             document.getElementById('quizOptionsContainer').classList.add('zones-disabled');
             
             if(selectedText === correctQuizZone.text.trim()) {
@@ -325,6 +325,11 @@
                     animateQuizHandwritingSequential(correctQuizZone.writingPaths, 0);
                 }
                 
+                // 💡 മാറ്റം വരുത്തിയത് ഇവിടെയാണ്:
+                // ആനിമേഷൻ തീരുന്ന സമയവും + നമ്മൾ ഉദ്ദേശിക്കുന്ന 2 സെക്കൻഡും കണക്കാക്കി 
+                // അടുത്ത ചോദ്യം ലോഡ് ചെയ്യുന്നത് അല്പം വൈകിപ്പിച്ചു.
+                let totalDelay = 3000; // 2 സെക്കൻഡ് സ്ഥിരമായി അവിടെ നിൽക്കാൻ
+                
                 setTimeout(() => {
                     currentQuizIdx++;
                     if(currentQuizIdx < quizPool.length) {
@@ -332,23 +337,23 @@
                     } else {
                         // 🎉 വിജയിച്ചു - ടൈമർ നിർത്തുക, സർട്ടിഫിക്കറ്റ് കാണിക്കുക
                         clearInterval(scoreInterval);
-                        localStorage.setItem(`score_${currentStudent}`, gameScore); // സ്കോർ സേവ് ചെയ്യുന്നു
+                        localStorage.setItem(`score_${currentStudent}`, gameScore);
                         generateCertificate();
                     }
-                }, 3000);
+                }, totalDelay); // 👈 2 സെക്കൻഡ് കഴിഞ്ഞേ അടുത്ത ചോദ്യത്തിലേക്ക് പോകൂ
             } else {
                 // ❌ തെറ്റിയാൽ ഗെയിം ഓവർ!
                 btnElement.style.background = "#e74c3c";
                 clearInterval(scoreInterval);
                 
-                // 10 പോയിന്റ് കുറയ്ക്കുന്നു (0-ൽ താഴെയാകില്ല)
                 gameScore = Math.max(0, gameScore - 10);
                 localStorage.setItem(`score_${currentStudent}`, gameScore);
                 
-                alert("❌ ഉത്തരം തെറ്റാണ്! നീ തോറ്റിരിക്കുന്നു. 10 പോയിന്റ് നഷ്ടമായി. വീണ്ടും ലോഗിൻ ചെയ്ത് ആദ്യമേ ശ്രമിക്കൂ!");
+                alert("❌ ഉത്തരം തെറ്റാണ്!  സാരമില്ല. 10 പോയിന്റ് നഷ്ടമായി. വീണ്ടും ലോഗിൻ ചെയ്ത് ആദ്യമേ ശ്രമിക്കൂ!");
                 showScreen('loginScreen');
             }
         }
+
 
         // ✍️ ഓരോ സ്ട്രോക്കുകളായി കൈ കൊണ്ട് വരയ്ക്കുന്ന ആനിമേഷൻ ഫങ്ക്ഷൻ (Sequential Drawing)
         function animateQuizHandwritingSequential(pathsData, pathIndex) {
