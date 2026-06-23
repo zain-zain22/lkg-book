@@ -405,7 +405,7 @@
             svg.appendChild(handImg);
 
             let ptIdx = 1;
-            let speed = 15; // സ്മൂത്ത് ആകാനുള്ള സ്പീഡ് (15ms)
+            let speed = 30; // സ്മൂത്ത് ആകാനുള്ള സ്പീഡ് (15ms)
             
             let interval = setInterval(() => {
                 // 🔒 ഈ സ്ട്രോക്കിലെ അവസാന പോയിന്റും വരച്ചു എന്ന് ഉറപ്പാക്കുന്നു
@@ -430,8 +430,8 @@
                 paths.forEach(p => p.setAttribute("d", p.getAttribute("d") + dString));
                 
                 // കൈ പേനയുടെ തുമ്പിനൊപ്പം നീങ്ങുന്നു
-                handImg.setAttribute("x", currPt.x - 25);
-                handImg.setAttribute("y", currPt.y - 155);
+                handImg.setAttribute("x", currPt.x - 33);
+                handImg.setAttribute("y", currPt.y - 50);
                 ptIdx++;
             }, speed);
         }
