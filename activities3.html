@@ -355,7 +355,7 @@
         }
 
 
-                // ✍️ ഓരോ സตรോക്കുകളായി കൈ കൊണ്ട് വരയ്ക്കുന്ന ആനിമേഷൻ ഫങ്ക്ഷൻ (Super Smooth & Slow)
+                        // ✍️ ഓരോ സ്ട്രോക്കുകളായി കൈ കൊണ്ട് വരയ്ക്കുന്ന ആനിമേഷൻ ഫങ്ക്ഷൻ (100% പൂർണ്ണമായി വരയ്ക്കാൻ)
         function animateQuizHandwritingSequential(pathsData, pathIndex) {
             let svg = document.getElementById('quizWriteEngine');
             if(pathIndex === 0) svg.innerHTML = ""; // ആദ്യത്തെ ലൈൻ ആണെങ്കിൽ ക്ലിയർ ചെയ്യുക
@@ -378,7 +378,7 @@
                 p.setAttribute("stroke-width", "3");
                 p.setAttribute("fill", "none");
                 p.setAttribute("stroke-linecap", "round");
-                p.setAttribute("stroke-linejoin", "round"); // 👈 വളവുകൾ സ്മൂത്ത് ആക്കാൻ
+                p.setAttribute("stroke-linejoin", "round");
                 p.setAttribute("d", `M ${pathPoints[0].x} ${pathPoints[0].y}`);
                 g.appendChild(p);
                 paths.push(p);
@@ -390,25 +390,29 @@
             handImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png");
             handImg.setAttribute("width", "180");  
             handImg.setAttribute("height", "180"); 
-            // പേനയുടെ തുമ്പ് കൃത്യമായി ലൈനിൽ വരാൻ (-25, -155) അഡ്ജസ്റ്റ് ചെയ്തു
             handImg.setAttribute("x", pathPoints[0].x - 25);
             handImg.setAttribute("y", pathPoints[0].y - 155);
             svg.appendChild(handImg);
 
             let ptIdx = 1;
             
-            // 💡 സ്മൂത്ത് ആക്കാനുള്ള പ്രധാന മാറ്റം ഇവിടെയാണ്:
-            // ഇവിടെ '20' എന്നത് മില്ലിസെക്കൻഡ് ആണ്. (20ms കൂടുമ്പോൾ ഓരോ പോയിന്റ് വീതം വരയ്ക്കും)
-            // എഴുത്ത് ഇനിയും സാവധാനത്തിലാക്കാൻ ഈ 20 മാറ്റി 30 ഓ 40 ഓ നൽകാം. വേഗത കൂട്ടാൻ 10 നൽകാം.
-            let speed = 20; 
+            // 💡 സ്മൂത്ത് ആകാനും ഒപ്പം ഒരു പോയിന്റും മിസ്സ് ആകാതിരിക്കാനും സമയം അല്പം കുറച്ചു (15ms)
+            let speed = 15; 
             
             let interval = setInterval(() => {
+                // 🔒 ഡാറ്റാ ലിസ്റ്റിലുള്ള അവസാന പോയിന്റും വരച്ചു എന്ന് ഉറപ്പാക്കുന്നു
                 if(ptIdx >= pathPoints.length) {
                     clearInterval(interval);
+                    
+                    // കൈ മാറ്റുന്നതിന് മുൻപ് അവസാന പോയിന്റ് വരെ വരച്ച വരി ഉറപ്പുവരുത്തുന്നു
+                    let lastPt = pathPoints[pathPoints.length - 1];
+                    let dString = ` L ${lastPt.x} ${lastPt.y}`;
+                    paths.forEach(p => p.setAttribute("d", p.getAttribute("d") + dString));
+                    
                     if(handImg && handImg.parentNode) handImg.parentNode.removeChild(handImg); // ലൈൻ കഴിഞ്ഞാൽ കൈ മാറ്റുക
                     
                     if(pathIndex === pathsData.length - 1) {
-                        // മുഴുവൻ എഴുതി തീർന്നാൽ 2 സെക്കൻഡ് അവിടെ നിൽക്കും
+                        // മുഴുവൻ എഴുതി തീർന്നാൽ കൃത്യം 2 സെക്കൻഡ് അവിടെ നിൽക്കും
                         setTimeout(() => {
                             finishQuizQuestion();
                         }, 2000); 
@@ -417,16 +421,18 @@
                     }
                     return;
                 }
+                
                 let currPt = pathPoints[ptIdx];
                 let dString = ` L ${currPt.x} ${currPt.y}`;
                 paths.forEach(p => p.setAttribute("d", p.getAttribute("d") + dString));
                 
-                // കൈ പേനയുടെ തുമ്പിനൊപ്പം സ്മൂത്തായി നീങ്ങുന്നു
+                // കൈ പേനയുടെ തുമ്പിനൊപ്പം നീങ്ങുന്നു
                 handImg.setAttribute("x", currPt.x - 25);
                 handImg.setAttribute("y", currPt.y - 155);
                 ptIdx++;
             }, speed);
         }
+
 
 
         // 🏆 സർട്ടിഫിക്കറ്റ് ജനറേറ്റ് ചെയ്യുന്ന ഫങ്ക്ഷൻ
