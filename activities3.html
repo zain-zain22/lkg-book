@@ -288,67 +288,75 @@
         }
 
         function startActivityGameDirectly() {
-    // 1. അഡ്മിൻ പാനലിന്റെ ഘടനയനുസരിച്ച് pages ലിസ്റ്റ് സുരക്ഷിതമായി ഫിൽട്ടർ ചെയ്യുന്നു
-    let allLivePages = [];
-    if (bookData && Array.isArray(bookData.pages)) {
-        allLivePages = bookData.pages.filter(p => !p.hidden && p.zones && p.zones.length > 0);
-    }
-
-    if(allLivePages.length === 0) {
-        alert("📖 പാഠപുസ്തകം സെക്ഷനിൽ വാക്കുകൾ ഒന്നും കണ്ടെത്തിയില്ല! അഡ്മിൻ പാനലിൽ പേജ് ആഡ് ചെയ്ത് പബ്ലിഷ് ചെയ്യുക.");
-        return;
-    }
-
-    quizWordsPool = [];
-    
-    // 2. ഓരോ പേജിലെയും സോണുകൾ പരിശോധിക്കുന്നു
-    allLivePages.forEach(p => {
-        p.zones.forEach(w => {
-            let rawAudio = w.audioSrc || "";
-            
-            // 🔒 ടെക്സ്റ്റും വോയ്സും ഒരുമിച്ചുള്ളവ മാത്രം ക്വിസ്സിലേക്ക് എടുക്കുന്നു (വോയ്സ് മാത്രമുള്ളവ ഒഴിവാക്കും)
-            if(w.text && w.text.trim() !== "" && rawAudio.trim() !== "") {
-                
-                // ഓഡിയോ പാത്ത് അഡ്മിൻ പാനൽ സേവ് ചെയ്യുമ്പോൾ വരാവുന്ന പിഴവ് സ്വയം തിരുത്തുന്നു
-                let correctAudio = rawAudio.trim();
-                if (!correctAudio.startsWith('data/') && !correctAudio.startsWith('http')) {
-                    correctAudio = 'data/' + correctAudio;
-                }
-                
-                quizWordsPool.push({
-                    text: w.text.trim(),
-                    audioSrc: correctAudio,
-                    lesson: p.lesson || 1,
-                    writingPaths: w.writingPaths || null 
-                });
-            }
-        });
-    });
-
-    if(quizWordsPool.length === 0) {
-        alert("⚠️ പാഠപുസ്തകത്തിൽ ടെക്സ്റ്റും ഓഡിയോയും ഒരുമിച്ചുള്ള വാക്കുകൾ ഒന്നും ലഭ്യമല്ല!");
-        return;
-    }
-
-    // കുട്ടികൾക്ക് ചോദ്യങ്ങൾ മാറിമറിഞ്ഞു വരാൻ വാക്കുകൾ ക്രമം മാറ്റുന്നു (Shuffle)
-    quizWordsPool.sort(() => 0.5 - Math.random());
-
-    currentQuizWordIdx = 0; 
-    quizPenaltyPoints = 0; 
-    gameTotalSeconds = 0;
-    
-    document.getElementById('liveQuizTimer').innerText = `⏱️ സമയം: 0 സെക്കൻഡ്`;
-    document.getElementById('liveQuizPenalty').innerText = `❌ തെറ്റിയത്: 0 തവണ`;
-    
-    clearInterval(gameTimerInterval);
-    gameTimerInterval = setInterval(() => {
-        gameTotalSeconds++;
-        document.getElementById('liveQuizTimer').innerText = `⏱️ സമയം: ${gameTotalSeconds} സെക്കൻഡ്`;
-    }, 1000);
-
-    showScreen('activityScreen');
-    generateQuizQuestion();
+    try {
+        let allLivePages = [];
+        if (bookData && Array.isArray(bookData.pages)) {
+            allLivePages = bookData.pages.filter(p => p && !p.hidden && p.zones && Array.isArray(p.zones) && p.zones.length > 0);
         }
+
+        if(allLivePages.length === 0) {
+            alert("📖 പാഠപുസ്തകം സെക്ഷനിൽ വാക്കുകൾ ഒന്നും കണ്ടെത്തിയില്ല! അഡ്മിൻ പാനലിൽ പേജ് ആഡ് ചെയ്ത് പബ്ലിഷ് ചെയ്യുക.");
+            return;
+        }
+
+        quizWordsPool = [];
+        
+        allLivePages.forEach(p => {
+            p.zones.forEach(w => {
+                // 🛑 ഡാറ്റ പൂർണ്ണമല്ലെങ്കിൽ എറർ വരാതിരിക്കാനുള്ള മുൻകരുതൽ
+                if (!w) return; 
+                
+                let rawText = w.text ? String(w.text).trim() : "";
+                let rawAudio = w.audioSrc ? String(w.audioSrc).trim() : "";
+                
+                // 🔒 ടെക്സ്റ്റും വോയ്സും ഒരേപോലെ ഉണ്ടെങ്കിൽ മാത്രം ക്വിസ്സിലേക്ക് എടുക്കുന്നു
+                if(rawText !== "" && rawAudio !== "") {
+                    
+                    let correctAudio = rawAudio;
+                    if (!correctAudio.startsWith('data/') && !correctAudio.startsWith('http')) {
+                        correctAudio = 'data/' + correctAudio;
+                    }
+                    
+                    quizWordsPool.push({
+                        text: rawText,
+                        audioSrc: correctAudio,
+                        lesson: p.lesson || 1,
+                        writingPaths: w.writingPaths || null 
+                    });
+                }
+            });
+        });
+
+        if(quizWordsPool.length === 0) {
+            alert("⚠️ പാഠപുസ്തകത്തിൽ ടെക്സ്റ്റും ഓഡിയോയും ഒരുമിച്ചുള്ള വാക്കുകൾ ഒന്നും ലഭ്യമല്ല!");
+            return;
+        }
+
+        // കുട്ടികൾക്ക് ചോദ്യങ്ങൾ മാറിമറിഞ്ഞു വരാൻ ഷഫിൾ ചെയ്യുന്നു
+        quizWordsPool.sort(() => 0.5 - Math.random());
+
+        currentQuizWordIdx = 0; 
+        quizPenaltyPoints = 0; 
+        gameTotalSeconds = 0;
+        
+        document.getElementById('liveQuizTimer').innerText = `⏱️ സമയം: 0 സെക്കൻഡ്`;
+        document.getElementById('liveQuizPenalty').innerText = `❌ തെറ്റിയത്: 0 തവണ`;
+        
+        clearInterval(gameTimerInterval);
+        gameTimerInterval = setInterval(() => {
+            gameTotalSeconds++;
+            document.getElementById('liveQuizTimer').innerText = `⏱️ സമയം: ${gameTotalSeconds} സെക്കൻഡ്`;
+        }, 1000);
+
+        showScreen('activityScreen');
+        generateQuizQuestion();
+
+    } catch (error) {
+        // 🛠️ എന്തെങ്കിലും അപ്രതീക്ഷിത എറർ ഉണ്ടായാൽ ബട്ടൺ ഫ്രീസ് ആകാതെ മൊബൈലിൽ മെസ്സേജ് കാണിക്കും
+        alert("ഡാറ്റ ലോഡ് ചെയ്യുന്നതിൽ ഒരു തകരാർ: " + error.message);
+    }
+}
+
        
 
 
