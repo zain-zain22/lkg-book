@@ -290,7 +290,7 @@
         function startActivityGameDirectly() {
     let allLivePages = [];
     
-    // 🔒 ഇവിടെ bookData എന്ന സ്പെല്ലിംഗ് കൃത്യമാക്കി സുരക്ഷിതമായി ഫിൽട്ടർ ചെയ്യുന്നു
+    // 1. ഡാറ്റ നേരിട്ട് അറേ ആയാലും ഒബ്ജക്റ്റ് ആയാലും ക്വിസ് ഓപ്പൺ ആകാൻ വേണ്ടി സുരക്ഷിതമായി ഫിൽട്ടർ ചെയ്യുന്നു
     if (typeof bookData !== 'undefined' && bookData) {
         if (Array.isArray(bookData.pages)) {
             allLivePages = bookData.pages.filter(p => !p.hidden && p.zones && p.zones.length > 0);
@@ -306,10 +306,10 @@
 
     quizWordsPool = [];
     
-    // പാഠപുസ്തകം ടാബിലെ ഓരോ പേജിലെയും സോണുകൾ (Zones) എടുക്കുന്നു
+    // 2. പാഠപുസ്തകം ടാബിലെ ഓരോ പേജിലെയും സോണുകൾ (Zones) എടുക്കുന്നു
     allLivePages.forEach(p => {
         p.zones.forEach(w => {
-            // 🔒 വോയ്‌സും ടെക്സ്റ്റും (അറബിക് വാക്ക്) ഒരേസമയം ഉള്ളവ മാത്രം ക്വിസ്സിലേക്ക് എടുക്കുന്നു
+            // 🔒 തിരുത്ത്: ടെക്സ്റ്റും (അറബിക് വാക്ക്) ഓഡിയോയും ഒരേസമയം ഉണ്ടെങ്കിൽ മാത്രം ക്വിസ്സിലേക്ക് എടുക്കുന്നു
             if(w.text && w.text.trim() !== "" && w.audioSrc && w.audioSrc.trim() !== "") {
                 
                 // ഓഡിയോ പാത്ത് അഡ്മിൻ പാനൽ സേവ് ചെയ്യുമ്പോൾ വരാവുന്ന പിഴവ് സ്വയം തിരുത്തുന്നു
@@ -352,6 +352,7 @@
     showScreen('activityScreen');
     generateQuizQuestion();
 }
+
 
 
 
