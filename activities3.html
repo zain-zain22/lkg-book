@@ -288,62 +288,67 @@
         }
 
         function startActivityGameDirectly() {
-            let allLivePages = [];
-            if (bookData && Array.isArray(bookData.pages)) {
-                allLivePages = bookData.pages.filter(p => !p.hidden && p.zones && p.zones.length > 0);
-            } else if (Array.isArray(bookData)) {
-                allLivePages = bookData.filter(p => !p.hidden && p.zones && p.zones.length > 0);
-            }
+    // 1. അഡ്മിൻ പാനലിന്റെ പുതിയ ഘടനയനുസരിച്ച് pages ലിസ്റ്റ് സുരക്ഷിതമായി ഫിൽട്ടർ ചെയ്യുന്നു
+    let allLivePages = [];
+    if (bookData && Array.isArray(bookData.pages)) {
+        allLivePages = bookData.pages.filter(p => !p.hidden && p.zones && p.zones.length > 0);
+    }
 
-            if(allLivePages.length === 0) {
-                alert("📖 പാഠപുസ്തകം സെക്ഷനിൽ വാക്കുകൾ ഒന്നും കണ്ടെത്തിയില്ല! അഡ്മിൻ പാനലിൽ പേജ് ആഡ് ചെയ്ത് പബ്ലിഷ് ചെയ്യുക.");
-                return;
-            }
+    if(allLivePages.length === 0) {
+        alert("📖 പാഠപുസ്തകം സെക്ഷനിൽ വാക്കുകൾ ഒന്നും കണ്ടെത്തിയില്ല! അഡ്മിൻ പാനലിൽ പേജ് ആഡ് ചെയ്ത് പബ്ലിഷ് ചെയ്യുക.");
+        return;
+    }
 
-            quizWordsPool = [];
-            
-            allLivePages.forEach(p => {
-                p.zones.forEach(w => {
-                    // 🔒 തിരുത്ത്: ടെക്സ്റ്റ് (Arabic Word) ഉള്ളവ മാത്രം ക്വിസ്സിലേക്ക് എടുക്കുന്നു.
-                    if (w.text && w.text.trim() !== "") {
-                        let correctAudio = w.audioSrc || "";
-                        if (correctAudio && !correctAudio.startsWith('data/') && !correctAudio.startsWith('http')) {
-                            correctAudio = 'data/' + correctAudio;
-                        }
-                        
-                        quizWordsPool.push({
-                            text: w.text.trim(),
-                            audioSrc: correctAudio,
-                            lesson: p.lesson || 1,
-                            writingPaths: w.writingPaths || null 
-                        });
-                    }
+    quizWordsPool = [];
+    
+    // 2. പാഠപുസ്തകം ടാബിലെ ഓരോ പേജിലെയും സോണുകൾ (Zones) എടുക്കുന്നു
+    allLivePages.forEach(p => {
+        p.zones.forEach(w => {
+            // 🔒 ടെക്സ്റ്റും (അറബിക് വാക്ക്) ഓഡിയോയും ഒരുമിച്ചുള്ളവ മാത്രം ക്വിസ്സിലേക്ക് എടുക്കുന്നു
+            if(w.text && w.text.trim() !== "" && w.audioSrc && w.audioSrc.trim() !== "") {
+                
+                // ഓഡിയോ പാത്ത് അഡ്മിൻ പാനൽ സേവ് ചെയ്യുമ്പോൾ വരാവുന്ന പിഴവ് സ്വയം തിരുത്തുന്നു
+                let correctAudio = w.audioSrc;
+                if (correctAudio && !correctAudio.startsWith('data/') && !correctAudio.startsWith('http')) {
+                    correctAudio = 'data/' + correctAudio;
+                }
+                
+                quizWordsPool.push({
+                    text: w.text.trim(),
+                    audioSrc: correctAudio,
+                    lesson: p.lesson || 1,
+                    writingPaths: w.writingPaths || null 
                 });
-            });
-
-            if(quizWordsPool.length === 0) {
-                alert("⚠️ പാഠപുസ്തകത്തിലെ വാക്കുകളിൽ ക്വിസ്സിനാവശ്യമായ ടെക്സ്റ്റ് ലഭ്യമല്ല!");
-                return;
             }
+        });
+    });
 
-            quizWordsPool.sort(() => 0.5 - Math.random());
+    if(quizWordsPool.length === 0) {
+        alert("⚠️ പാഠപുസ്തകത്തിൽ ടെക്സ്റ്റും ഓഡിയോയും ഒരുമിച്ചുള്ള വാക്കുകൾ ഒന്നും ലഭ്യമല്ല!");
+        return;
+    }
 
-            currentQuizWordIdx = 0; 
-            quizPenaltyPoints = 0; 
-            gameTotalSeconds = 0;
-            
-            document.getElementById('liveQuizTimer').innerText = `⏱️ സമയം: 0 സെക്കൻഡ്`;
-            document.getElementById('liveQuizPenalty').innerText = `❌ തെറ്റിയത്: 0 തവണ`;
-            
-            clearInterval(gameTimerInterval);
-            gameTimerInterval = setInterval(() => {
-                gameTotalSeconds++;
-                document.getElementById('liveQuizTimer').innerText = `⏱️ സമയം: ${gameTotalSeconds} സെക്കൻഡ്`;
-            }, 1000);
+    // കുട്ടികൾക്ക് ചോദ്യങ്ങൾ മാറിമറിഞ്ഞു വരാൻ വാക്കുകൾ ക്രമം മാറ്റുന്നു (Shuffle)
+    quizWordsPool.sort(() => 0.5 - Math.random());
 
-            showScreen('activityScreen');
-            generateQuizQuestion();
-        }
+    currentQuizWordIdx = 0; 
+    quizPenaltyPoints = 0; 
+    gameTotalSeconds = 0;
+    
+    document.getElementById('liveQuizTimer').innerText = `⏱️ സമയം: 0 സെക്കൻഡ്`;
+    document.getElementById('liveQuizPenalty').innerText = `❌ തെറ്റിയത്: 0 തവണ`;
+    
+    clearInterval(gameTimerInterval);
+    gameTimerInterval = setInterval(() => {
+        gameTotalSeconds++;
+        document.getElementById('liveQuizTimer').innerText = `⏱️ സമയം: ${gameTotalSeconds} സെക്കൻഡ്`;
+    }, 1000);
+
+    showScreen('activityScreen');
+    generateQuizQuestion();
+}
+
+
 
         function stopActivityGameTimer() {
             clearInterval(gameTimerInterval);
