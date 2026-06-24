@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ഡിജിറ്റൽ സൗണ്ട് ബുക്ക് - 4 Line കേട്ടെഴുത്ത് പാനൽ</title>
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Segoe UI', sans-serif; background: #1a252f; color: white; margin: 0; padding: 0; user-select: none; overflow-x: hidden; }
+        
+        .container { width: 100%; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        
+        h1 { font-size: 36px; color: #3498db; margin: 0 0 5px 0; text-align: center; }
+        p.subtitle { font-size: 18px; color: #bdc3c7; margin: 0 0 25px 0; text-align: center; }
+
+        /* 📊 പ്രധാന ഡിസ്പ്ലേ ഏരിയ (ഇരുവശത്തും വാക്കുകൾ, നടുവിൽ 4-ലൈൻ സ്ക്രീൻ) */
+        .workspace { display: flex; align-items: center; justify-content: center; gap: 30px; width: 100%; max-width: 1200px; margin-bottom: 25px; flex-wrap: wrap; }
+        
+        .word-box { font-size: 60px; font-weight: bold; color: #fff; background: #2c3e50; padding: 30px 40px; border-radius: 15px; border: 4px dashed #3498db; min-width: 250px; text-align: center; box-shadow: 0 10px 20px rgba(0,0,0,0.3); font-family: 'Traditional Arabic', 'Amiri', sans-serif; flex: 1; max-width: 300px; }
+        
+        /* 📜 4-Line റൈറ്റിംഗ് പാഡ് ഡിസൈൻ */
+        .four-line-container { 
+            position: relative; 
+            width: 100%; 
+            max-width: 500px; 
+            height: 220px; 
+            background: #ffffff; 
+            border: 4px solid #3498db; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+            background-image: 
+                linear-gradient(#e74c3c 2px, transparent 2px), /* Top Red Line */
+                linear-gradient(#3498db 2px, transparent 2px), /* Middle Blue Line 1 */
+                linear-gradient(#3498db 2px, transparent 2px), /* Middle Blue Line 2 */
+                linear-gradient(#e74c3c 2px, transparent 2px); /* Bottom Red Line */
+            background-size: 100% 220px;
+            /* വരികളുടെ കൃത്യമായ അകലം (4 Line കോപ്പിബുക്ക് പോലെ) */
+            background-position: 0 50px, 0 90px, 0 130px, 0 170px;
+            background-repeat: no-repeat;
+        }
+        
+        #dictPlaybackEngine { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+
+        /* കൺട്രോളുകൾ */
+        .timer-container { font-size: 28px; font-weight: bold; color: #e74c3c; margin-bottom: 25px; background: rgba(0,0,0,0.3); padding: 10px 30px; border-radius: 50px; border: 2px solid #e74c3c; display: flex; align-items: center; gap: 15px; }
+        .controls-bar { width: 100%; max-width: 600px; display: flex; gap: 15px; justify-content: center; margin-top: 10px; }
+        button { color: white; border: none; padding: 16px 30px; font-size: 20px; font-weight: bold; border-radius: 12px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.2s; min-width: 150px; }
+        
+        .btn-orange { background: #e67e22; }
+        .btn-green { background: #2ecc71; }
+        .btn-purple { background: #9b59b6; }
+
+        .big-answer { font-size: 40px; font-weight: bold; color: #2ecc71; margin: 15px 0; text-align: center; font-family: 'Segoe UI', sans-serif; display: none;}
+        .tick-timer { font-size: 30px; color: #2ecc71; font-weight: bold; margin-bottom: 20px; animation: pulse 1s infinite; display: none; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .loading { font-size: 24px; color: #3498db; font-weight: bold; }
+
+        @media (max-width: 768px) {
+            .workspace { flex-direction: column; gap: 20px; }
+            .word-box { max-width: 100%; min-width: 100%; font-size: 45px; }
+            .four-line-container { max-width: 100%; height: 180px; background-size: 100% 180px; background-position: 0 40px, 0 75px, 0 110px, 0 145px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="loadingText" class="loading">🔄 വേർഡ് ആപ്പിൽ നിന്നുള്ള ഡാറ്റ ലോഡ് ചെയ്യുന്നു...</div>
+
+        <div id="mainContent" style="display:none; width: 100%; flex-direction: column; align-items: center;">
+            <h1>✍️ 4-Line കേട്ടെഴുത്ത് പാനൽ</h1>
+            <p class="subtitle">ശബ്ദം ശ്രദ്ധിച്ച് കേട്ട് ശരിയായ വാക്ക് കണ്ടെത്തുക</p>
+
+            <div class="workspace">
+                <!-- ഇടതുവശത്തെ വാക്ക് -->
+                <div id="wordDisplay1" class="word-box">???</div>
+
+                <!-- നടുവിലെ 4-ലൈൻ കോപ്പി ബുക്ക് ബോക്സ് -->
+                <div class="four-line-container">
+                    <svg id="dictPlaybackEngine" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
+                </div>
+
+                <!-- വലതുവശത്തെ വാക്ക് -->
+                <div id="wordDisplay2" class="word-box">???</div>
+            </div>
+
+            <div id="mainTimerContainer" class="timer-container">
+                <span id="timerIcon">⏳</span>
+                <span id="timerText">ബാക്കി സമയം: 30 സെക്കൻഡ്</span>
+            </div>
+
+            <div id="bigAnswerText" class="big-answer"></div>
+            <div id="tickTimerText" class="tick-timer">📝 നോട്ട്ബുക്കിൽ ടിക്ക് ഇടൂ... (5)</div>
+
+            <div class="controls-bar">
+                <button id="btnPauseResume" class="btn-orange" onclick="togglePauseResume()">⏸️ Pause</button>
+                <button id="btnForceSkip" class="btn-purple" style="display:none;" onclick="startNewRound()">➡️ അടുത്ത വാക്ക്</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audioPlayer" style="display:none;"></audio>
+
+    <script>
+        let wordAppData = { words: [] };
+        let allWords = [];
+        let currentTargetWord = null;
+        let timerId = null;
+        let audioIntervalId = null;
+        let selfCheckTimerId = null;
+        
+        let timeLeft = 30;
+        let isPaused = false;
+        let animationLoopCount = 0; 
+
+        window.onload = function() {
+            loadWordAppData();
+        };
+
+        async function loadWordAppData() {
+            try {
+                let r = await fetch(`./data/data.json?t=${Date.now()}`);
+                if(r.ok) {
+                    wordAppData = await r.json();
+                    extractLatest30Words();
+                } else {
+                    document.getElementById('loadingText').innerText = "❌ data/data.json കണ്ടെത്താനായില്ല!";
+                }
+            } catch(e) {
+                document.getElementById('loadingText').innerText = "❌ ഡാറ്റ ലോഡ് ചെയ്യുന്നതിൽ പിശക്!";
+            }
+        }
+
+        function extractLatest30Words() {
+            allWords = [];
+            let source = wordAppData.words || wordAppData;
+
+            if(Array.isArray(source)) {
+                source.forEach(item => {
+                    allWords.push({
+                        word: item.arbiText || item.word || "", 
+                        malWord: item.mal || "",               
+                        audioSrc: item.audio ? `data/${item.audio}` : "", 
+                        path: item.writingPaths || null         
+                    });
+                });
+            }
+
+            if(allWords.length < 2) {
+                document.getElementById('loadingText').innerText = "❌ വേർഡ് പാനലിൽ മതിയായ വാക്കുകൾ ഇല്ല!";
+                return;
+            }
+
+            if(allWords.length > 30) allWords = allWords.slice(-30);
+
+            document.getElementById('loadingText').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'flex';
+            
+            startNewRound();
+        }
+
+        function startNewRound() {
+            clearInterval(timerId);
+            clearInterval(audioIntervalId);
+            clearInterval(selfCheckTimerId);
+            document.getElementById('audioPlayer').pause();
+
+            isPaused = false;
+            timeLeft = 30;
+            animationLoopCount = 0;
+
+            document.getElementById('mainTimerContainer').style.display = 'flex';
+            document.getElementById('bigAnswerText').style.display = 'none';
+            document.getElementById('tickTimerText').style.display = 'none';
+            document.getElementById('btnPauseResume').style.display = 'block';
+            document.getElementById('btnPauseResume').className = "btn-orange";
+            document.getElementById('btnPauseResume').innerText = "⏸️ Pause";
+            document.getElementById('btnForceSkip').style.display = 'none';
+            document.getElementById('timerIcon').innerText = "⏳";
+            document.getElementById('dictPlaybackEngine').innerHTML = "";
+
+            // ബോക്സുകളുടെ ബോർഡർ റീസെറ്റ് ചെയ്യുന്നു
+            document.getElementById('wordDisplay1').style.border = "4px dashed #3498db";
+            document.getElementById('wordDisplay1').style.background = "#2c3e50";
+            document.getElementById('wordDisplay2').style.border = "4px dashed #3498db";
+            document.getElementById('wordDisplay2').style.background = "#2c3e50";
+
+            let shuffled = [...allWords].sort(() => 0.5 - Math.random());
+            let w1 = shuffled[0];
+            let w2 = shuffled[1];
+
+            document.getElementById('wordDisplay1').innerText = w1.word;
+            document.getElementById('wordDisplay1').setAttribute('data-word', w1.word);
+            document.getElementById('wordDisplay2').innerText = w2.word;
+            document.getElementById('wordDisplay2').setAttribute('data-word', w2.word);
+
+            currentTargetWord = Math.random() > 0.5 ? w1 : w2;
+
+            // 🔊 ഓഡിയോ പ്ലേ ബാക്ക് എൻജിൻ
+            let player = document.getElementById('audioPlayer');
+            function playVoice() {
+                if(!isPaused && currentTargetWord.audioSrc) {
+                    player.src = currentTargetWord.audioSrc + "?t=" + Date.now();
+                    player.play().catch(e => console.log("Audio Error:", e));
+                }
+            }
+            playVoice();
+            audioIntervalId = setInterval(playVoice, 4000);
+
+            document.getElementById('timerText').innerText = `ബാക്കി സമയം: ${timeLeft} സെക്കൻഡ്`;
+            timerId = setInterval(() => {
+                if(!isPaused) {
+                    timeLeft--;
+                    if(timeLeft <= 0) {
+                        clearInterval(timerId);
+                        revealAnswerAutomatically();
+                    } else {
+                        document.getElementById('timerText').innerText = `ബാക്കി സമയം: ${timeLeft} സെക്കൻഡ്`;
+                    }
+                }
+            }, 1000);
+        }
+
+        function togglePauseResume() {
+            let btn = document.getElementById('btnPauseResume');
+            let player = document.getElementById('audioPlayer');
+            if(!isPaused) {
+                isPaused = true;
+                btn.innerText = "▶️ Resume";
+                btn.className = "btn-green";
+                player.pause();
+            } else {
+                isPaused = false;
+                btn.innerText = "⏸️ Pause";
+                btn.className = "btn-orange";
+                player.play().catch(e => console.log(e));
+            }
+        }
+
+        function revealAnswerAutomatically() {
+            clearInterval(timerId);
+            clearInterval(audioIntervalId);
+            document.getElementById('audioPlayer').pause();
+
+            document.getElementById('mainTimerContainer').style.display = 'none';
+            document.getElementById('btnPauseResume').style.display = 'none';
+
+            // ശരിയായ വാക്കിന്റെ ബോക്സ് പച്ച നിറമാക്കുന്നു
+            let box1 = document.getElementById('wordDisplay1');
+            let box2 = document.getElementById('wordDisplay2');
+            
+            if(box1.getAttribute('data-word') === currentTargetWord.word) {
+                box1.style.background = "#27ae60";
+                box1.style.border = "4px solid #2ecc71";
+            } else {
+                box2.style.background = "#27ae60";
+                box2.style.border = "4px solid #2ecc71";
+            }
+
+            let ansDiv = document.getElementById('bigAnswerText');
+            ansDiv.innerText = `ശരിയുത്തരം: ${currentTargetWord.word} (${currentTargetWord.malWord})`;
+            ansDiv.style.display = 'block';
+
+            if(currentTargetWord.path && currentTargetWord.path.length > 0) {
+                animationLoopCount = 0; 
+                runHandwritingLoop();   
+            } else {
+                startSelfCheckCountdown();
+            }
+        }
+
+        function runHandwritingLoop() {
+            animationLoopCount++;
+            if (animationLoopCount <= 3) { 
+                document.getElementById('dictPlaybackEngine').innerHTML = "";
+                animateHandwriting(currentTargetWord.path, () => {
+                    setTimeout(runHandwritingLoop, 800);
+                });
+            } else {
+                startSelfCheckCountdown();
+            }
+        }
+
+        // ✍️ 4-വരികൾക്കുള്ളിലേക്ക് പാകത്തിൽ മാറ്റി പച്ച നിറത്തിൽ വരയ്ക്കുന്നു
+        function animateHandwriting(pathPoints, onCompleteCB) {
+            if(!pathPoints || pathPoints.length === 0) { if(onCompleteCB) onCompleteCB(); return; }
+            let svg = document.getElementById('dictPlaybackEngine');
+            let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+            let paths = [];
+            
+            // അഡ്മിൻ പാനലിലെ 1000x1000 കോർഡിനേറ്റുകളെ 4-ലൈൻ സ്കെയിലിലേക്ക് മാറ്റുന്നു (Y അക്ഷം 400 മുതൽ 750 വരെ)
+            let scaleX = 0.8;
+            let scaleY = 0.35;
+            let offsetX = 100;
+            let offsetY = 420; 
+
+            for(let i=0; i<10; i++) {
+                let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                p.setAttribute("transform", `translate(${(i-5)*0.2}, ${-(i-5)*0.2})`);
+                p.setAttribute("stroke", "#27ae60"); 
+                p.setAttribute("stroke-width", "7"); 
+                p.setAttribute("fill", "none");
+                p.setAttribute("stroke-linecap", "round");
+                
+                let startX = pathPoints[0][0].x * scaleX + offsetX;
+                let startY = pathPoints[0][0].y * scaleY + offsetY;
+                p.setAttribute("d", `M ${startX} ${startY}`);
+                g.appendChild(p);
+                paths.push(p);
+            }
+            svg.appendChild(g);
+
+            let ptIdx = 0;
+            let lineIdx = 0;
+            let speed = 10; 
+
+            function drawStep() {
+                if (lineIdx >= pathPoints.length) {
+                    clearInterval(interval);
+                    if(onCompleteCB) onCompleteCB();
+                    return;
+                }
+
+                let currentLine = pathPoints[lineIdx];
+                let currPt = currentLine[ptIdx];
+
+                if (!currPt) {
+                    lineIdx++;
+                    ptIdx = 0;
+                    if (lineIdx < pathPoints.length && pathPoints[lineIdx][0]) {
+                        let nX = pathPoints[lineIdx][0].x * scaleX + offsetX;
+                        let nY = pathPoints[lineIdx][0].y * scaleY + offsetY;
+                        paths.forEach(p => {
+                            p.setAttribute("d", p.getAttribute("d") + ` M ${nX} ${nY}`);
+                        });
+                    }
+                    return;
+                }
+
+                let finalX = currPt.x * scaleX + offsetX;
+                let finalY = currPt.y * scaleY + offsetY;
+
+                let dString = ` L ${finalX} ${finalY}`;
+                paths.forEach(p => p.setAttribute("d", p.getAttribute("d") + dString));
+                ptIdx++;
+            }
+
+            let interval = setInterval(drawStep, speed);
+        }
+
+        function startSelfCheckCountdown() {
+            let tickTimeLeft = 5;
+            let tickUi = document.getElementById('tickTimerText');
+            tickUi.innerText = `📝 നോട്ട്ബുക്കിൽ ടിക്ക് ഇടൂ... (${tickTimeLeft})`;
+            tickUi.style.display = 'block';
+            document.getElementById('btnForceSkip').style.display = 'block';
+
+            selfCheckTimerId = setInterval(() => {
+                tickTimeLeft--;
+                if(tickTimeLeft <= 0) {
+                    clearInterval(selfCheckTimerId);
+                    startNewRound(); 
+                } else {
+                    tickUi.innerText = `📝 നോട്ട്ബുക്കിൽ ടിക്ക് ഇടൂ... (${tickTimeLeft})`;
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
