@@ -6,6 +6,13 @@
 <title>വേർഡ് ആപ്പ് - ഫോർ ലൈൻ റൂം</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
+:root {
+    /* 🛠️ അക്ഷരങ്ങളുടെ വലുപ്പവും ലൈൻ അലൈൻമെന്റും കൺട്രോൾ ചെയ്യാൻ ഇവിടെ മാറ്റങ്ങൾ വരുത്തുക */
+    --arabic-font-size: 46px;   /* അക്ഷരങ്ങളുടെ വലിപ്പം */
+    --box-left-move: 0px;       /* ഇടത്/വലത് മാറ്റാൻ (- വാല്യൂസ് ഇടത്തോട്ടും + വാല്യൂസ് വലത്തോട്ടും മാറ്റും) */
+    --box-top-move: 5px;        /* മുകളിലേക്കും താഴേക്കും മാറ്റാൻ (ഫോർ ലൈൻ വരികൾക്ക് കൃത്യമായി ഒപ്പമിരുത്താൻ) */
+}
+
 * { box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; margin: 0; padding: 10px; text-align: center; user-select: none; }
 .container { max-width: 600px; margin: 0 auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid #2ecc71; }
@@ -15,7 +22,7 @@ label { font-weight: bold; color: #34495e; display: block; text-align: left; mar
 .btn { color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; }
 .btn-green { background: #2ecc71; box-shadow: 0 4px 0 #27ae60; }
 
-/* 🖋️ ഫോർ ലൈൻ ഡിസൈൻ */
+/* 🖋️ മുകളിലെ രണ്ട് ബോക്സുകൾക്ക് മാത്രം ഫോർ ലൈൻ വരികൾ */
 .four-lines-container {
     display: flex;
     justify-content: space-between;
@@ -26,7 +33,7 @@ label { font-weight: bold; color: #34495e; display: block; text-align: left; mar
 
 .four-line-box {
     flex: 1;
-    height: 150px;
+    height: 160px;
     background: #fff;
     border: 2px solid #cbd5e1;
     border-radius: 8px;
@@ -37,12 +44,12 @@ label { font-weight: bold; color: #34495e; display: block; text-align: left; mar
         linear-gradient(#3498db 1px, transparent 1px), 
         linear-gradient(#3498db 1px, transparent 1px), 
         linear-gradient(#e74c3c 1px, transparent 1px);
-    background-size: 100% 150px;
-    background-position: 0 35px, 0 60px, 0 85px, 0 110px;
+    background-size: 100% 160px;
+    background-position: 0 40px, 0 65px, 0 90px, 0 115px;
     background-repeat: no-repeat;
 }
 
-/* 🌟 പ്രത്യേകമായി താഴെ കാണിക്കുന്ന ഹാൻഡ്‌റൈറ്റിംഗ് ബോർഡ് */
+/* 🖋️ ഹാൻഡ്‌റൈറ്റിംഗ് ബോർഡ് (ഫോർ ലൈൻ ഒഴിവാക്കി വെറും വൈറ്റ് ബോർഡ് ആക്കിയത്) */
 .writing-board-section {
     margin-top: 25px;
     border-top: 2px dashed #bdc3c7;
@@ -63,14 +70,6 @@ label { font-weight: bold; color: #34495e; display: block; text-align: left; mar
     border-radius: 8px;
     position: relative;
     overflow: hidden;
-    background-image: 
-        linear-gradient(#e74c3c 1px, transparent 1px), 
-        linear-gradient(#3498db 1px, transparent 1px), 
-        linear-gradient(#3498db 1px, transparent 1px), 
-        linear-gradient(#e74c3c 1px, transparent 1px);
-    background-size: 100% 180px;
-    background-position: 0 50px, 0 80px, 0 110px, 0 140px;
-    background-repeat: no-repeat;
 }
 
 .hw-canvas-svg {
@@ -83,21 +82,23 @@ label { font-weight: bold; color: #34495e; display: block; text-align: left; mar
     pointer-events: none;
 }
 
+/* 🌟 അലൈൻമെന്റും വലിപ്പവും അഡ്ജസ്റ്റ് ചെയ്യുന്ന അറബിക് ടെക്സ്റ്റ് സ്റ്റൈൽ */
 .arbi-text {
-    font-size: 38px;
+    font-size: var(--arabic-font-size);
     font-family: 'Traditional Arabic', 'Amiri', sans-serif;
     color: #2c3e50;
     direction: rtl;
     width: 100%;
     height: 100%;
     position: absolute;
-    top: 0;
-    left: 0;
     z-index: 2;
     display: flex;
     justify-content: center;
     align-items: center;
-    opacity: 1; 
+    white-space: nowrap; /* അധികം വരുന്ന വാക്കുകൾ മാർജിന് പുറത്തുപോകാതെ താഴേക്ക് വീഴാൻ സഹായിക്കും */
+    text-overflow: ellipsis;
+    /* ലൈനുകൾക്ക് ഒപ്പമാക്കാൻ മാറ്റിവെക്കുന്ന പൊസിഷൻ */
+    transform: translate(var(--box-left-move), var(--box-top-move));
 }
 
 /* ടിക്ക് മാർക്ക് പൊസിഷൻ */
@@ -135,7 +136,7 @@ label { font-weight: bold; color: #34495e; display: block; text-align: left; mar
 
 <div class="container" id="gameContent" style="display:none;">
     <h3 id="studentHeading" style="color:#7f8c8d; margin:0;">👤 കുട്ടി: </h3>
-    <h2>ശ്രദ്ധിച്ചു കേൾക്കുക, എഴുതുന്നത് നോക്കുക! 🎧🖋️</h2>
+    <h2>ശ്രദ്ധിച്ചു കേൾക്കുക, എഴുതുന്നത് നോക്കുക! 🎧🖋 suicide</h2>
 
     <div class="timer-container" id="timerContainer">
         <div class="timer-bar" id="timerBar"></div>
@@ -192,6 +193,7 @@ async function loadDataFromJSON() {
         }
         
         if(rawData.words && Array.isArray(rawData.words)) {
+            // 30 വാക്കുകൾ വേർതിരിച്ച് വെക്കുന്നു
             last30Words = rawData.words.slice(-30);
         }
     } catch (e) {
@@ -228,19 +230,27 @@ function startGame() {
 }
 
 function generateQuestion() {
-    // റീസെറ്റ് എലമെന്റുകൾ
+    // 🌟 30 വാക്കുകൾ പൂർണ്ണമായും തീർന്നു കഴിഞ്ഞാൽ അവസാനിക്കാൻ
+    if(last30Words.length < 2) {
+        if(currentAudio) currentAudio.pause();
+        clearInterval(timerInterval);
+        document.getElementById('gameContent').innerHTML = "<h2 style='color:#2ecc71; margin-top:50px;'>🎉 എല്ലാ വാക്കുകളും കഴിഞ്ഞു! കളി അവസാനിച്ചു. 🎉</h2>";
+        return;
+    }
+
+    // റീസെറ്റുകൾ
     document.getElementById('tickLeft').style.display = 'none';
     document.getElementById('tickRight').style.display = 'none';
     document.getElementById('writingSection').style.display = 'none';
     document.getElementById('svgWritingBoard').innerHTML = '';
 
+    // ലിസ്റ്റിൽ നിന്ന് റാൻഡം വാക്കുകൾ എടുക്കുന്നു
     let shuffled = [...last30Words].sort(() => 0.5 - Math.random());
     leftWord = shuffled[0];
     rightWord = shuffled[1];
     
     targetWord = Math.random() > 0.5 ? leftWord : rightWord;
 
-    // വാക്കുകൾ രണ്ട് ബോക്സിലും ആദ്യം തന്നെ കാണിക്കുന്നു
     document.getElementById('textLeft').innerText = leftWord.arbiText || '';
     document.getElementById('textRight').innerText = rightWord.arbiText || '';
 
@@ -279,7 +289,6 @@ function startTimer() {
     }, 100);
 }
 
-// 30 സെക്കൻഡ് കഴിഞ്ഞാൽ സംഭവിക്കുന്നത്
 function handleTimeoutAndReveal() {
     if(currentAudio) {
         currentAudio.loop = false;
@@ -287,14 +296,12 @@ function handleTimeoutAndReveal() {
     }
 
     let correctSide = (targetWord === leftWord) ? 'Left' : 'Right';
-    
-    // 1. ശരിയായ വാക്കിന് മുകളിൽ ടിക്ക് മാർക്ക് കാണിക്കുന്നു
     document.getElementById('tick' + correctSide).style.display = 'block';
-    
-    // 2. പ്രത്യേകമായുള്ള ഹാൻഡ്‌റൈറ്റിംഗ് സെക്ഷൻ തുറക്കുന്നു
     document.getElementById('writingSection').style.display = 'block';
 
-    // 3. അതിലേക്ക് hand.png ഉപയോഗിച്ച് വരയ്ക്കുന്നു
+    // 🌟 ഉപയോഗിച്ച ടാർഗെറ്റ് വാക്കിനെ ലിസ്റ്റിൽ നിന്ന് നീക്കം ചെയ്യുന്നു (അടുത്ത തവണ വരാതിരിക്കാൻ)
+    last30Words = last30Words.filter(word => word !== targetWord);
+
     if(targetWord.writingPaths && targetWord.writingPaths.length > 0) {
         animateHandwritingWithPen('svgWritingBoard', targetWord.writingPaths);
     } else {
@@ -302,13 +309,12 @@ function handleTimeoutAndReveal() {
     }
 }
 
-// പ്രത്യേക ബോർഡിൽ hand.png വെച്ച് വരയ്ക്കുന്ന ഫങ്ഷൻ
 function animateHandwritingWithPen(svgId, pathsData) {
     let board = document.getElementById(svgId);
     board.innerHTML = ""; 
     
     let penImg = document.createElementNS("http://www.w3.org/2000/svg", "image");
-    penImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png"); // ഹബിലെ hand.png ലോഡ് ചെയ്യുന്നു
+    penImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png"); 
     penImg.setAttribute("width", "80");
     penImg.setAttribute("height", "80");
     penImg.setAttribute("style", "position: absolute; z-index: 100; pointer-events: none; transition: transform 0.05s linear;");
@@ -319,7 +325,6 @@ function animateHandwritingWithPen(svgId, pathsData) {
     function drawNextPath() {
         if(pIdx >= pathsData.length) {
             penImg.style.display = "none";
-            // അനിമേഷൻ കഴിഞ്ഞാൽ 3 സെക്കൻഡ് തനിയെ അടുത്ത ചോദ്യത്തിലേക്ക് പോകും
             setTimeout(generateQuestion, 3000);
             return;
         }
@@ -335,7 +340,7 @@ function animateHandwritingWithPen(svgId, pathsData) {
         for(let i=0; i<16; i++) {
             let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
             p.setAttribute("transform", `translate(${(i-8)*0.4}, ${-(i-8)})`);
-            p.setAttribute("stroke", "#e74c3c"); // ചുവപ്പ് മഷി
+            p.setAttribute("stroke", "#e74c3c"); 
             p.setAttribute("stroke-width", "2.5");
             p.setAttribute("fill", "none");
             p.setAttribute("stroke-linecap", "round");
@@ -362,7 +367,6 @@ function animateHandwritingWithPen(svgId, pathsData) {
             
             svgPathsArray.forEach(p => p.setAttribute("d", dStr));
             
-            // പേനയുടെ പൊസിഷൻ അഡ്ജസ്റ്റ് ചെയ്യുന്നു
             penImg.setAttribute("x", pt.x - 10); 
             penImg.setAttribute("y", pt.y - 70); 
 
