@@ -2,38 +2,34 @@
 <html lang="ml">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>വേർഡ് ആപ്പ് - ഫോർ ലൈൻ റൂം</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>വേർഡ് ആപ്പ് - ലാപ്ടോപ്പ് ലൈവ് റൂം</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
-:root {
-    /* 🛠️ അക്ഷരങ്ങളുടെ വലുപ്പവും ലൈൻ അലൈൻമെന്റും കൺട്രോൾ ചെയ്യാൻ ഇവിടെ മാറ്റങ്ങൾ വരുത്തുക */
-    --arabic-font-size: 46px;   /* അക്ഷരങ്ങളുടെ വലിപ്പം */
-    --box-left-move: 0px;       /* ഇടത്/വലത് മാറ്റാൻ (- വാല്യൂസ് ഇടത്തോട്ടും + വാല്യൂസ് വലത്തോട്ടും മാറ്റും) */
-    --box-top-move: 5px;        /* മുകളിലേക്കും താഴേക്കും മാറ്റാൻ (ഫോർ ലൈൻ വരികൾക്ക് കൃത്യമായി ഒപ്പമിരുത്താൻ) */
-}
-
 * { box-sizing: border-box; }
-body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; margin: 0; padding: 10px; text-align: center; user-select: none; }
-.container { max-width: 600px; margin: 0 auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid #2ecc71; }
-h2 { color: #2c3e50; margin: 5px 0 15px 0; font-size: 20px; }
+body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; margin: 0; padding: 20px; text-align: center; user-select: none; height: 100vh; overflow: hidden; }
+
+/* 💻 ലാപ്ടോപ്പ് സ്ക്രീനിനായി ഫുൾ വിഡ്ത് ഡാഷ്‌ബോർഡ് */
+.container { max-width: 95%; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid #2ecc71; height: 92vh; display: flex; flex-direction: column; justify-content: space-between; position: relative; }
+h2 { color: #2c3e50; margin: 0 0 10px 0; font-size: 24px; }
 select { width: 100%; padding: 12px; margin: 8px 0 15px 0; border: 2px solid #2ecc71; border-radius: 6px; font-size: 16px; font-weight: bold; color: #2c3e50; outline: none; }
 label { font-weight: bold; color: #34495e; display: block; text-align: left; margin-top: 10px; font-size: 14px; }
 .btn { color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; }
 .btn-green { background: #2ecc71; box-shadow: 0 4px 0 #27ae60; }
 
-/* 🖋️ മുകളിലെ രണ്ട് ബോക്സുകൾക്ക് മാത്രം ഫോർ ലൈൻ വരികൾ */
+/* 🖋️ രണ്ട് ഫോർ ലൈൻ ബോക്സുകൾ ഒരേ വരിയിൽ നീളത്തിൽ */
 .four-lines-container {
     display: flex;
     justify-content: space-between;
-    gap: 15px;
-    margin: 20px 0;
+    gap: 25px;
+    margin: 15px 0;
     width: 100%;
+    flex: 1;
 }
 
 .four-line-box {
     flex: 1;
-    height: 160px;
+    height: 220px;
     background: #fff;
     border: 2px solid #cbd5e1;
     border-radius: 8px;
@@ -44,27 +40,27 @@ label { font-weight: bold; color: #34495e; display: block; text-align: left; mar
         linear-gradient(#3498db 1px, transparent 1px), 
         linear-gradient(#3498db 1px, transparent 1px), 
         linear-gradient(#e74c3c 1px, transparent 1px);
-    background-size: 100% 160px;
-    background-position: 0 40px, 0 65px, 0 90px, 0 115px;
+    background-size: 100% 220px;
+    background-position: 0 60px, 0 95px, 0 130px, 0 165px;
     background-repeat: no-repeat;
 }
 
-/* 🖋️ ഹാൻഡ്‌റൈറ്റിംഗ് ബോർഡ് (ഫോർ ലൈൻ ഒഴിവാക്കി വെറും വൈറ്റ് ബോർഡ് ആക്കിയത്) */
+/* 🖋️ താഴത്തെ പ്ലെയിൻ ഹാൻഡ്‌റൈറ്റിംഗ് ബോർഡ് */
 .writing-board-section {
-    margin-top: 25px;
+    margin-top: 15px;
     border-top: 2px dashed #bdc3c7;
-    padding-top: 15px;
+    padding-top: 10px;
 }
 .writing-title {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: bold;
     color: #e67e22;
     text-align: left;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
 }
 .full-width-board {
     width: 100%;
-    height: 180px;
+    height: 220px;
     background: #fff;
     border: 2px solid #e67e22;
     border-radius: 8px;
@@ -82,9 +78,9 @@ label { font-weight: bold; color: #34495e; display: block; text-align: left; mar
     pointer-events: none;
 }
 
-/* 🌟 അലൈൻമെന്റും വലിപ്പവും അഡ്ജസ്റ്റ് ചെയ്യുന്ന അറബിക് ടെക്സ്റ്റ് സ്റ്റൈൽ */
+/* 🌟 ലൈവ് ടൂളുമായി കണക്റ്റ് ചെയ്തിട്ടുള്ള ടെക്സ്റ്റ് സ്റ്റൈൽ */
 .arbi-text {
-    font-size: var(--arabic-font-size);
+    font-size: 55px; /* ഡിഫോൾട്ട് സൈസ് */
     font-family: 'Traditional Arabic', 'Amiri', sans-serif;
     color: #2c3e50;
     direction: rtl;
@@ -95,34 +91,65 @@ label { font-weight: bold; color: #34495e; display: block; text-align: left; mar
     display: flex;
     justify-content: center;
     align-items: center;
-    white-space: nowrap; /* അധികം വരുന്ന വാക്കുകൾ മാർജിന് പുറത്തുപോകാതെ താഴേക്ക് വീഴാൻ സഹായിക്കും */
-    text-overflow: ellipsis;
-    /* ലൈനുകൾക്ക് ഒപ്പമാക്കാൻ മാറ്റിവെക്കുന്ന പൊസിഷൻ */
-    transform: translate(var(--box-left-move), var(--box-top-move));
+    white-space: nowrap;
+    /* ലൈവ് ടൂൾ വഴി ഇത് മാറും */
+    transform: translate(0px, 0px); 
 }
 
-/* ടിക്ക് മാർക്ക് പൊസിഷൻ */
+/* ടിക്ക് മാർക്ക് */
 .result-badge {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    font-size: 35px;
+    top: 15px;
+    right: 15px;
+    font-size: 45px;
     z-index: 10;
     display: none;
 }
 .result-badge-tick { color: #2ecc71; }
 
-/* 30 സെക്കൻഡ് ടൈമർ ബാർ */
-.timer-container { width: 100%; background: #ddd; height: 8px; border-radius: 4px; margin: 15px 0; overflow: hidden; }
+/* ടൈമർ */
+.timer-container { width: 100%; background: #ddd; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 10px; }
 .timer-bar { height: 100%; background: #e74c3c; width: 100%; transition: width 0.1s linear; }
+
+/* 🛠️ വലതുവശത്ത് ചെറുതായി കാണുന്ന ലൈവ് അലൈൻമെന്റ് ടൂൾ */
+.alignment-controller {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: rgba(44, 62, 80, 0.95);
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 10000;
+    width: 180px;
+    text-align: left;
+    font-size: 12px;
+}
+.alignment-controller h4 { margin: 0 0 8px 0; color: #2ecc71; font-size: 13px; text-align: center; border-bottom: 1px solid #7f8c8d; padding-bottom: 4px;}
+.alignment-controller label { color: #bdc3c7; margin-top: 6px; font-size: 11px; display: flex; justify-content: space-between;}
+.alignment-controller input { width: 100%; margin: 2px 0; cursor: pointer; }
 
 .overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; }
 </style>
 </head>
 <body>
 
+<div class="alignment-controller" id="liveTool" style="display:none;">
+    <h4><i class="fa-solid fa-sliders"></i> അലൈൻമെന്റ് ടൂൾ</h4>
+    
+    <label>വലിപ്പം (Size): <span id="valSize">55px</span></label>
+    <input type="range" id="sliderSize" min="30" max="100" value="55" oninput="adjustText()">
+    
+    <label>ഉയരം (Top/Down): <span id="valTop">0px</span></label>
+    <input type="range" id="sliderTop" min="-50" max="50" value="0" oninput="adjustText()">
+    
+    <label>ഇടത്/വലത് (Left/Right): <span id="valLeft">0px</span></label>
+    <input type="range" id="sliderLeft" min="-100" max="100" value="0" oninput="adjustText()">
+</div>
+
 <div id="startOverlay" class="overlay-screen">
-    <h1><i class="fa-solid fa-graduation-cap fa-2x" style="color:#2ecc71; margin-bottom:10px; display:block;"></i> വേർഡ് ആപ്പ് ലൈവ് 🪄</h1>
+    <h1><i class="fa-solid fa-laptop fa-2x" style="color:#2ecc71; margin-bottom:10px; display:block;"></i> വേർഡ് ആപ്പ് ലാപ്ടോപ്പ് ലൈവ് 🪄</h1>
     <div style="width:100%; max-width:350px;">
         <label style="color:white;">🏫 മദ്രസ തിരഞ്ഞെടുക്കുക:</label>
         <select id="madrasaSelect" onchange="updateStudentDropdown()"></select>
@@ -135,8 +162,11 @@ label { font-weight: bold; color: #34495e; display: block; text-align: left; mar
 </div>
 
 <div class="container" id="gameContent" style="display:none;">
-    <h3 id="studentHeading" style="color:#7f8c8d; margin:0;">👤 കുട്ടി: </h3>
-    <h2>ശ്രദ്ധിച്ചു കേൾക്കുക, എഴുതുന്നത് നോക്കുക! 🎧🖋 suicide</h2>
+    <div style="display:flex; justify-content: space-between; align-items: center;">
+        <h3 id="studentHeading" style="color:#7f8c8d; margin:0; font-size: 16px;">👤 കുട്ടി: </h3>
+        <h2 style="margin:0;">ശ്രദ്ധിച്ചു കേൾക്കുക, എഴുതുന്നത് നോക്കുക! 🎧🖋️</h2>
+        <span style="color:#aaa; font-size:12px;">Laptop Mode</span>
+    </div>
 
     <div class="timer-container" id="timerContainer">
         <div class="timer-bar" id="timerBar"></div>
@@ -169,10 +199,29 @@ let rightWord = null;
 let targetWord = null;
 let currentAudio = null;
 let timerInterval = null;
-let maxDuration = 30; // 30 സെക്കൻഡ്
+let maxDuration = 30;
 
 window.onload = function() {
     loadDataFromJSON();
+}
+
+// 🛠️ ലൈവ് അലൈൻമെന്റ് ടൂൾ പ്രവർത്തിപ്പിക്കുന്ന ഫങ്ഷൻ
+function adjustText() {
+    let size = document.getElementById('sliderSize').value;
+    let top = document.getElementById('sliderTop').value;
+    let left = document.getElementById('sliderLeft').value;
+    
+    // ടെക്സ്റ്റ് ലേബലുകൾ അപ്ഡേറ്റ് ചെയ്യുന്നു
+    document.getElementById('valSize').innerText = size + 'px';
+    document.getElementById('valTop').innerText = top + 'px';
+    document.getElementById('valLeft').innerText = left + 'px';
+    
+    // രണ്ട് അറബിക് ടെക്സ്റ്റുകളിലേക്കും ഈ മാറ്റങ്ങൾ ഒരേസമയം കൊടുക്കുന്നു
+    let texts = document.querySelectorAll('.arbi-text');
+    texts.forEach(txt => {
+        txt.style.fontSize = size + 'px';
+        txt.style.transform = `translate(${left}px, ${top}px)`;
+    });
 }
 
 async function loadDataFromJSON() {
@@ -193,7 +242,6 @@ async function loadDataFromJSON() {
         }
         
         if(rawData.words && Array.isArray(rawData.words)) {
-            // 30 വാക്കുകൾ വേർതിരിച്ച് വെക്കുന്നു
             last30Words = rawData.words.slice(-30);
         }
     } catch (e) {
@@ -225,26 +273,25 @@ function startGame() {
     document.getElementById('studentHeading').innerText = `👤 കുട്ടി: ${student}`;
     document.getElementById('startOverlay').style.display = 'none';
     document.getElementById('gameContent').style.display = 'block';
+    document.getElementById('liveTool').style.display = 'block'; // ഗെയിം തുടങ്ങുമ്പോൾ ടൂൾ ഓണാക്കുന്നു
     
     generateQuestion();
 }
 
 function generateQuestion() {
-    // 🌟 30 വാക്കുകൾ പൂർണ്ണമായും തീർന്നു കഴിഞ്ഞാൽ അവസാനിക്കാൻ
     if(last30Words.length < 2) {
         if(currentAudio) currentAudio.pause();
         clearInterval(timerInterval);
-        document.getElementById('gameContent').innerHTML = "<h2 style='color:#2ecc71; margin-top:50px;'>🎉 എല്ലാ വാക്കുകളും കഴിഞ്ഞു! കളി അവസാനിച്ചു. 🎉</h2>";
+        document.getElementById('liveTool').style.display = 'none';
+        document.getElementById('gameContent').innerHTML = "<h2 style='color:#2ecc71; margin-top:100px; font-size:35px;'>🎉 എല്ലാ വാക്കുകളും കഴിഞ്ഞു! കളി അവസാനിച്ചു. 🎉</h2>";
         return;
     }
 
-    // റീസെറ്റുകൾ
     document.getElementById('tickLeft').style.display = 'none';
     document.getElementById('tickRight').style.display = 'none';
     document.getElementById('writingSection').style.display = 'none';
     document.getElementById('svgWritingBoard').innerHTML = '';
 
-    // ലിസ്റ്റിൽ നിന്ന് റാൻഡം വാക്കുകൾ എടുക്കുന്നു
     let shuffled = [...last30Words].sort(() => 0.5 - Math.random());
     leftWord = shuffled[0];
     rightWord = shuffled[1];
@@ -253,6 +300,9 @@ function generateQuestion() {
 
     document.getElementById('textLeft').innerText = leftWord.arbiText || '';
     document.getElementById('textRight').innerText = rightWord.arbiText || '';
+
+    // ചോദ്യം മാറുമ്പോഴും നിങ്ങൾ സെറ്റ് ചെയ്ത അലൈൻമെന്റ് നിലനിർത്താൻ
+    adjustText();
 
     playTargetAudioLoop();
     startTimer();
@@ -299,7 +349,6 @@ function handleTimeoutAndReveal() {
     document.getElementById('tick' + correctSide).style.display = 'block';
     document.getElementById('writingSection').style.display = 'block';
 
-    // 🌟 ഉപയോഗിച്ച ടാർഗെറ്റ് വാക്കിനെ ലിസ്റ്റിൽ നിന്ന് നീക്കം ചെയ്യുന്നു (അടുത്ത തവണ വരാതിരിക്കാൻ)
     last30Words = last30Words.filter(word => word !== targetWord);
 
     if(targetWord.writingPaths && targetWord.writingPaths.length > 0) {
@@ -315,8 +364,8 @@ function animateHandwritingWithPen(svgId, pathsData) {
     
     let penImg = document.createElementNS("http://www.w3.org/2000/svg", "image");
     penImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png"); 
-    penImg.setAttribute("width", "80");
-    penImg.setAttribute("height", "80");
+    penImg.setAttribute("width", "90");
+    penImg.setAttribute("height", "90");
     penImg.setAttribute("style", "position: absolute; z-index: 100; pointer-events: none; transition: transform 0.05s linear;");
     penImg.style.display = "none";
     
@@ -341,7 +390,7 @@ function animateHandwritingWithPen(svgId, pathsData) {
             let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
             p.setAttribute("transform", `translate(${(i-8)*0.4}, ${-(i-8)})`);
             p.setAttribute("stroke", "#e74c3c"); 
-            p.setAttribute("stroke-width", "2.5");
+            p.setAttribute("stroke-width", "3");
             p.setAttribute("fill", "none");
             p.setAttribute("stroke-linecap", "round");
             g.appendChild(p);
@@ -367,8 +416,9 @@ function animateHandwritingWithPen(svgId, pathsData) {
             
             svgPathsArray.forEach(p => p.setAttribute("d", dStr));
             
+            // ലാപ്ടോപ്പ് സ്ക്രീനിന് അനുയോജ്യമായ പെൻ ഓഫ്സെറ്റ് പൊസിഷൻ
             penImg.setAttribute("x", pt.x - 10); 
-            penImg.setAttribute("y", pt.y - 70); 
+            penImg.setAttribute("y", pt.y - 80); 
 
             ptIdx++;
             requestAnimationFrame(tracePoints);
