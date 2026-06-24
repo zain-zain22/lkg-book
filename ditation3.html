@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>വേർഡ് ആപ്പ് - മൾട്ടി സ്ക്രീൻ റൂം</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+    /* 🛠️ ഡിഫോൾട്ട് അക്ഷരങ്ങളുടെ വലുപ്പവും ലൈൻ അലൈൻമെന്റും */
+    --arabic-font-size: 50px;   
+    --box-left-move: 0px;       
+    --box-top-move: 0px;        
+}
+
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; margin: 0; padding: 10px; text-align: center; user-select: none; height: 100vh; overflow: hidden; }
+
+/* 💻 ലാപ്ടോപ്പിലും മൊബൈലിലും സ്ക്രോൾ വരാത്ത മെയിൻ കണ്ടെയ്നർ */
+.container { 
+    max-width: 98%; 
+    margin: 0 auto; 
+    background: white; 
+    padding: 12px; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    border-top: 5px solid #2ecc71; 
+    height: 95vh; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+    position: relative; 
+}
+
+h2 { color: #2c3e50; margin: 0; font-size: 20px; }
+.header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+
+/* 🖋️ രണ്ട് ഫോർ ലൈൻ ബോക്സുകൾ */
+.four-lines-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin: 8px 0;
+    width: 100%;
+}
+
+.four-line-box {
+    flex: 1;
+    height: 160px; /* ലാപ്ടോപ്പ് ഡിഫോൾട്ട് ഹൈറ്റ് */
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    background-image: 
+        linear-gradient(#e74c3c 1px, transparent 1px), 
+        linear-gradient(#3498db 1px, transparent 1px), 
+        linear-gradient(#3498db 1px, transparent 1px), 
+        linear-gradient(#e74c3c 1px, transparent 1px);
+    background-size: 100% 160px;
+    background-position: 0 40px, 0 70px, 0 100px, 0 130px;
+    background-repeat: no-repeat;
+}
+
+/* 🖋️ താഴത്തെ പ്ലെയിൻ ഹാൻഡ്‌റൈറ്റിംഗ് ബോർഡ് */
+.writing-board-section {
+    margin-top: 5px;
+    border-top: 2px dashed #bdc3c7;
+    padding-top: 5px;
+}
+.writing-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #e67e22;
+    text-align: left;
+    margin-bottom: 3px;
+}
+.full-width-board {
+    width: 100%;
+    height: 160px; /* ലാപ്ടോപ്പ് ഡിഫോൾട്ട് ഹൈറ്റ് */
+    background: #fff;
+    border: 2px solid #e67e22;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hw-canvas-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.arbi-text {
+    font-size: var(--arabic-font-size);
+    font-family: 'Traditional Arabic', 'Amiri', sans-serif;
+    color: #2c3e50;
+    direction: rtl;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    transform: translate(var(--box-left-move), var(--box-top-move)); 
+}
+
+.result-badge { position: absolute; top: 10px; right: 10px; font-size: 35px; z-index: 10; display: none; }
+.result-badge-tick { color: #2ecc71; }
+.timer-container { width: 100%; background: #ddd; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+.timer-bar { height: 100%; background: #e74c3c; width: 100%; transition: width 0.1s linear; }
+
+/* 🛠️ അലൈൻമെന്റ് ടൂൾ സ്റ്റൈൽ */
+.alignment-controller {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(44, 62, 80, 0.95);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    z-index: 10000;
+    width: 160px;
+    text-align: left;
+    font-size: 11px;
+}
+.alignment-controller h4 { margin: 0 0 5px 0; color: #2ecc71; font-size: 12px; text-align: center; border-bottom: 1px solid #7f8c8d; padding-bottom: 2px;}
+.alignment-controller label { color: #bdc3c7; margin-top: 4px; font-size: 10px; display: flex; justify-content: space-between;}
+.alignment-controller input { width: 100%; margin: 2px 0; }
+
+/* 📱 📱 📱 മൊബൈൽ ലാൻഡ്‌കേപ്പ് മോഡിനായുള്ള പ്രത്യേക റെസ്പോൺസീവ് സെറ്റിംഗ്സ് 📱 📱 📱 */
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    body { padding: 4px; }
+    .container { height: 97vh; padding: 6px; }
+    h2 { font-size: 16px; }
+    .header-area h3 { font-size: 13px; margin: 0; }
+    
+    /* ഉയരം കുറഞ്ഞ മൊബൈൽ സ്ക്രീനിൽ ബോക്സുകളുടെ ഉയരം കുറക്കുന്നു (സ്ക്രോളിംഗ് ഒഴിവാക്കാൻ) */
+    .four-line-box { 
+        height: 105px; 
+        background-size: 100% 105px;
+        background-position: 0 25px, 0 45px, 0 65px, 0 85px;
+    }
+    .full-width-board { height: 105px; }
+    .writing-board-section { margin-top: 2px; padding-top: 2px; }
+    .writing-title { font-size: 12px; margin-bottom: 1px; }
+    
+    /* ടൂൾ ബോക്സ് മൊബൈലിൽ ഒതുങ്ങി നിൽക്കാൻ */
+    .alignment-controller { width: 130px; padding: 6px; top: 5px; right: 5px; font-size: 10px; }
+    .alignment-controller h4 { font-size: 11px; margin-bottom: 3px; }
+}
+
+.overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; }
+</style>
+</head>
+<body>
+
+<div class="alignment-controller" id="liveTool" style="display:none;">
+    <h4><i class="fa-solid fa-sliders"></i> ടൂൾ ബോക്സ്</h4>
+    <label>വലിപ്പം: <span id="valSize">50px</span></label>
+    <input type="range" id="sliderSize" min="20" max="90" value="50" oninput="adjustText()">
+    
+    <label>ഉയരം: <span id="valTop">0px</span></label>
+    <input type="range" id="sliderTop" min="-40" max="40" value="0" oninput="adjustText()">
+    
+    <label>ഇടത്/വലത്: <span id="valLeft">0px</span></label>
+    <input type="range" id="sliderLeft" min="-80" max="80" value="0" oninput="adjustText()">
+</div>
+
+<div id="startOverlay" class="overlay-screen">
+    <h1><i class="fa-solid fa-display fa-2x" style="color:#2ecc71; margin-bottom:10px; display:block;"></i> വേർഡ് ആപ്പ് സ്മാർട്ട് ലൈവ് 🪄</h1>
+    <div style="width:100%; max-width:350px;">
+        <label style="color:white;">🏫 മദ്രസ തിരഞ്ഞെടുക്കുക:</label>
+        <select id="madrasaSelect" onchange="updateStudentDropdown()"></select>
+        
+        <label style="color:white;">👤 കുട്ടിയുടെ പേര്:</label>
+        <select id="studentSelect"></select>
+        
+        <button class="btn btn-green" onclick="startGame()">🚀 ക്ലാസ്സ് ആരംഭിക്കുക</button>
+    </div>
+</div>
+
+<div class="container" id="gameContent" style="display:none;">
+    <div class="header-area">
+        <h3 id="studentHeading" style="color:#7f8c8d; font-size: 14px;">👤 കുട്ടി: </h3>
+        <h2>ശ്രദ്ധിച്ചു കേൾക്കുക, എഴുതുന്നത് നോക്കുക! 🎧🖋️</h2>
+        <span style="color:#aaa; font-size:11px;" id="modeIndicator">Smart Mode</span>
+    </div>
+
+    <div class="timer-container" id="timerContainer">
+        <div class="timer-bar" id="timerBar"></div>
+    </div>
+
+    <div class="four-lines-container">
+        <div class="four-line-box" id="boxLeft">
+            <div class="arbi-text" id="textLeft"></div>
+            <div class="result-badge" id="tickLeft"><i class="fa-solid fa-circle-check result-badge-tick"></i></div>
+        </div>
+
+        <div class="four-line-box" id="boxRight">
+            <div class="arbi-text" id="textRight"></div>
+            <div class="result-badge" id="tickRight"><i class="fa-solid fa-circle-check result-badge-tick"></i></div>
+        </div>
+    </div>
+
+    <div class="writing-board-section" id="writingSection" style="display:none;">
+        <div class="writing-title"><i class="fa-solid fa-pen-fancy"></i> എഴുതുന്ന രൂപം ശ്രദ്ധിക്കുക:</div>
+        <div class="full-width-board">
+            <svg class="hw-canvas-svg" id="svgWritingBoard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
+        </div>
+    </div>
+</div>
+
+<script>
+let last30Words = [];
+let leftWord = null;
+let rightWord = null;
+let targetWord = null;
+let currentAudio = null;
+let timerInterval = null;
+let maxDuration = 30;
+
+window.onload = function() {
+    loadDataFromJSON();
+    detectDevice();
+}
+
+function detectDevice() {
+    if(window.innerHeight < 500) {
+        document.getElementById('modeIndicator').innerText = "Mobile Landscape";
+    }
+}
+
+function adjustText() {
+    let size = document.getElementById('sliderSize').value;
+    let top = document.getElementById('sliderTop').value;
+    let left = document.getElementById('sliderLeft').value;
+    
+    document.getElementById('valSize').innerText = size + 'px';
+    document.getElementById('valTop').innerText = top + 'px';
+    document.getElementById('valLeft').innerText = left + 'px';
+    
+    let texts = document.querySelectorAll('.arbi-text');
+    texts.forEach(txt => {
+        txt.style.fontSize = size + 'px';
+        txt.style.transform = `translate(${left}px, ${top}px)`;
+    });
+}
+
+async function loadDataFromJSON() {
+    try {
+        let response = await fetch('data/data.json?t=' + Date.now());
+        let rawData = await response.json();
+        
+        if(rawData.madrassas) {
+            let mSelect = document.getElementById('madrasaSelect');
+            mSelect.innerHTML = '';
+            rawData.madrassas.forEach(m => {
+                let opt = document.createElement('option');
+                opt.value = m.name; opt.innerText = m.name;
+                mSelect.appendChild(opt);
+            });
+            window.schoolConfig = rawData.madrassas;
+            updateStudentDropdown();
+        }
+        
+        if(rawData.words && Array.isArray(rawData.words)) {
+            last30Words = rawData.words.slice(-30);
+        }
+    } catch (e) {
+        alert("ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല!");
+    }
+}
+
+function updateStudentDropdown() {
+    let currentMadrasa = document.getElementById('madrasaSelect').value;
+    let sSelect = document.getElementById('studentSelect');
+    sSelect.innerHTML = '';
+    if(window.schoolConfig) {
+        let found = window.schoolConfig.find(m => m.name === currentMadrasa);
+        if(found && found.students) {
+            found.students.forEach(student => {
+                let opt = document.createElement('option');
+                opt.value = student; opt.innerText = student;
+                sSelect.appendChild(opt);
+            });
+        }
+    }
+}
+
+function startGame() {
+    let student = document.getElementById('studentSelect').value;
+    if(!student) return alert("പേര് തിരഞ്ഞെടുക്കുക!");
+    if(last30Words.length < 2) return alert("മിനിമം 2 വാക്കുകൾ വേണം!");
+    
+    document.getElementById('studentHeading').innerText = `👤 കുട്ടി: ${student}`;
+    document.getElementById('startOverlay').style.display = 'none';
+    document.getElementById('gameContent').style.display = 'block';
+    document.getElementById('liveTool').style.display = 'block';
+    
+    generateQuestion();
+}
+
+function generateQuestion() {
+    if(last30Words.length < 2) {
+        if(currentAudio) currentAudio.pause();
+        clearInterval(timerInterval);
+        document.getElementById('liveTool').style.display = 'none';
+        document.getElementById('gameContent').innerHTML = "<h2 style='color:#2ecc71; margin-top:20vh; font-size:30px;'>🎉 എല്ലാ വാക്കുകളും കഴിഞ്ഞു! 🎉</h2>";
+        return;
+    }
+
+    document.getElementById('tickLeft').style.display = 'none';
+    document.getElementById('tickRight').style.display = 'none';
+    document.getElementById('writingSection').style.display = 'none';
+    document.getElementById('svgWritingBoard').innerHTML = '';
+
+    let shuffled = [...last30Words].sort(() => 0.5 - Math.random());
+    leftWord = shuffled[0];
+    rightWord = shuffled[1];
+    
+    targetWord = Math.random() > 0.5 ? leftWord : rightWord;
+
+    document.getElementById('textLeft').innerText = leftWord.arbiText || '';
+    document.getElementById('textRight').innerText = rightWord.arbiText || '';
+
+    adjustText();
+    playTargetAudioLoop();
+    startTimer();
+}
+
+function playTargetAudioLoop() {
+    if(!targetWord || !targetWord.audio) return;
+    if(currentAudio) currentAudio.pause();
+    
+    let audioPath = targetWord.audio;
+    if (!audioPath.startsWith('data/') && !audioPath.startsWith('http')) {
+        audioPath = 'data/' + audioPath;
+    }
+    
+    currentAudio = new Audio(audioPath + '?t=' + Date.now());
+    currentAudio.loop = true; 
+    currentAudio.play().catch(e => console.log("Audio Error", e));
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    let timeLeft = maxDuration;
+    let bar = document.getElementById('timerBar');
+    
+    timerInterval = setInterval(() => {
+        timeLeft -= 0.1;
+        let percentage = (timeLeft / maxDuration) * 100;
+        bar.style.width = percentage + '%';
+        
+        if(timeLeft <= 0) {
+            clearInterval(timerInterval);
+            handleTimeoutAndReveal();
+        }
+    }, 100);
+}
+
+function handleTimeoutAndReveal() {
+    if(currentAudio) {
+        currentAudio.loop = false;
+        currentAudio.pause();
+    }
+
+    let correctSide = (targetWord === leftWord) ? 'Left' : 'Right';
+    document.getElementById('tick' + correctSide).style.display = 'block';
+    document.getElementById('writingSection').style.display = 'block';
+
+    last30Words = last30Words.filter(word => word !== targetWord);
+
+    if(targetWord.writingPaths && targetWord.writingPaths.length > 0) {
+        animateHandwritingWithPen('svgWritingBoard', targetWord.writingPaths);
+    } else {
+        setTimeout(generateQuestion, 3000);
+    }
+}
+
+function animateHandwritingWithPen(svgId, pathsData) {
+    let board = document.getElementById(svgId);
+    board.innerHTML = ""; 
+    
+    let penImg = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    penImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png"); 
+    penImg.setAttribute("width", "70");
+    penImg.setAttribute("height", "70");
+    penImg.setAttribute("style", "position: absolute; z-index: 100; pointer-events: none; transition: transform 0.05s linear;");
+    penImg.style.display = "none";
+    
+    let pIdx = 0;
+    
+    function drawNextPath() {
+        if(pIdx >= pathsData.length) {
+            penImg.style.display = "none";
+            setTimeout(generateQuestion, 3000);
+            return;
+        }
+        
+        let currentPathPoints = pathsData[pIdx];
+        if(!currentPathPoints || currentPathPoints.length === 0) {
+            pIdx++; drawNextPath(); return;
+        }
+        
+        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        let svgPathsArray = [];
+        
+        for(let i=0; i<16; i++) {
+            let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            p.setAttribute("transform", `translate(${(i-8)*0.4}, ${-(i-8)})`);
+            p.setAttribute("stroke", "#e74c3c"); 
+            p.setAttribute("stroke-width", "2.8");
+            p.setAttribute("fill", "none");
+            p.setAttribute("stroke-linecap", "round");
+            g.appendChild(p);
+            svgPathsArray.push(p);
+        }
+        board.appendChild(g);
+        board.appendChild(penImg);
+        penImg.style.display = "block";
+        
+        let ptIdx = 0;
+        let dStr = `M ${currentPathPoints[0].x} ${currentPathPoints[0].y}`;
+        
+        function tracePoints() {
+            if(ptIdx >= currentPathPoints.length) {
+                pIdx++;
+                setTimeout(drawNextPath, 150);
+                return;
+            }
+            
+            let pt = currentPathPoints[ptIdx];
+            if(ptIdx === 0) dStr = `M ${pt.x} ${pt.y}`;
+            else dStr += ` L ${pt.x} ${pt.y}`;
+            
+            svgPathsArray.forEach(p => p.setAttribute("d", dStr));
+            
+            penImg.setAttribute("x", pt.x - 10); 
+            penImg.setAttribute("y", pt.y - 65); 
+
+            ptIdx++;
+            requestAnimationFrame(tracePoints);
+        }
+        tracePoints();
+    }
+    drawNextPath();
+}
+</script>
+
+</body>
+</html>
+
