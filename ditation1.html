@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ml">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>വേർഡ് ആപ്പ് - ലിസണിങ് ഗെയിം</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; margin: 0; padding: 10px; text-align: center; user-select: none; }
+.container { max-width: 600px; margin: 0 auto; background: white; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border-top: 5px solid #2ecc71; }
+h2 { color: #2c3e50; margin: 5px 0 15px 0; font-size: 20px; }
+select { width: 100%; padding: 12px; margin: 8px 0 15px 0; border: 2px solid #2ecc71; border-radius: 6px; font-size: 16px; font-weight: bold; color: #2c3e50; outline: none; }
+label { font-weight: bold; color: #34495e; display: block; text-align: left; margin-top: 10px; font-size: 14px; }
+.btn { color: white; border: none; padding: 14px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 16px; }
+.btn-green { background: #2ecc71; box-shadow: 0 4px 0 #27ae60; }
+.btn-green:active { transform: translateY(4px); box-shadow: none; }
+
+/* 🖋️ Four-Line Copy Design (വരി നീളത്തിൽ) */
+.four-lines-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin: 20px 0;
+    width: 100%;
+}
+
+.four-line-box {
+    flex: 1;
+    height: 180px;
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    /* ഫോർ ലൈൻ ബാക്ക്ഗ്രൗണ്ട് വരകൾ */
+    background-image: 
+        linear-gradient(#e74c3c 1px, transparent 1px), /* ടോപ്പ് റെഡ് ലൈൻ */
+        linear-gradient(#3498db 1px, transparent 1px), /* മിഡിൽ ബ്ലൂ ലൈൻ 1 */
+        linear-gradient(#3498db 1px, transparent 1px), /* മിഡിൽ ബ്ലൂ ലൈൻ 2 */
+        linear-gradient(#e74c3c 1px, transparent 1px); /* ബോട്ടം റെഡ് ലൈൻ */
+    background-size: 100% 180px;
+    /* വരകളുടെ കൃത്യമായ പൊസിഷൻ (ഫോർ ലൈൻ കോപ്പി പോലെ) */
+    background-position: 0 50px, 0 80px, 0 110px, 0 140px;
+    background-repeat: no-repeat;
+}
+
+.four-line-box:active {
+    transform: scale(0.98);
+}
+
+/* ഹാൻഡ്‌റൈറ്റിംഗ് ഒറിജിനൽ അനിമേഷൻ ക്യാൻവാസ് */
+.hw-canvas-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* അറബിക് അക്ഷരങ്ങൾ തെളിഞ്ഞു വരുന്നത് */
+.arbi-text {
+    font-size: 42px;
+    font-family: 'Traditional Arabic', 'Amiri', sans-serif;
+    color: #2c3e50;
+    direction: rtl;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+}
+.arbi-text.revealed {
+    opacity: 0.2; /* ശരിയുത്തരം കാണിക്കുമ്പോൾ ബാക്ക്ഗ്രൗണ്ടിൽ ലൈറ്റ് ആയി അക്ഷരം വരും */
+}
+
+/* വലിയ ടിക്ക് മാർക്ക് / തെറ്റ് മാർക്ക് */
+.result-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 32px;
+    z-index: 10;
+    display: none;
+}
+.correct .result-badge-tick { color: #2ecc71; display: block; }
+.wrong .result-badge-cross { color: #e74c3c; display: block; }
+
+/* 30 സെക്കൻഡ് പ്രോഗ്രസ് ബാർ */
+.timer-container { width: 100%; background: #ddd; height: 8px; border-radius: 4px; margin: 15px 0; overflow: hidden; display: none;}
+.timer-bar { height: 100%; background: #e74c3c; width: 100%; transition: width 0.1s linear; }
+
+.overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; }
+.overlay-screen h1 { font-size: 24px; margin-bottom: 20px; }
+</style>
+</head>
+<body>
+
+<div id="startOverlay" class="overlay-screen">
+    <h1><i class="fa-solid fa-play fa-2x" style="color:#2ecc71; margin-bottom:10px; display:block;"></i> ശബ്ദം കേട്ട് കണ്ടെത്തുക 🎧</h1>
+    <div style="width:100%; max-width:350px;">
+        <label style="color:white;">🏫 മദ്രസ തിരഞ്ഞെടുക്കുക:</label>
+        <select id="madrasaSelect" onchange="updateStudentDropdown()"></select>
+        
+        <label style="color:white;">👤 കുട്ടിയുടെ പേര്:</label>
+        <select id="studentSelect"></select>
+        
+        <button class="btn btn-green" onclick="startGame()">🎯 കളി തുടങ്ങാം 🚀</button>
+    </div>
+</div>
+
+<div class="container" id="gameContent" style="display:none;">
+    <h3 id="studentHeading" style="color:#7f8c8d; margin:0;">👤 കുട്ടി: </h3>
+    <h2>🎧 ശബ്ദം കേട്ട് കൃത്യമായ വാക്ക് തിരഞ്ഞെടുക്കുക!</h2>
+
+    <button class="btn btn-green" style="background:#3498db; box-shadow:0 4px 0 #2980b9; margin-bottom:10px;" onclick="playTargetAudio()">
+        <i class="fa-solid fa-volume-high"></i> ശബ്ദം വീണ്ടും കേൾക്കുക
+    </button>
+
+    <div class="timer-container" id="timerContainer">
+        <div class="timer-bar" id="timerBar"></div>
+    </div>
+
+    <div class="four-lines-container">
+        <div class="four-line-box" id="boxLeft" onclick="checkAnswer('left')">
+            <div class="arbi-text" id="textLeft"></div>
+            <svg class="hw-canvas-svg" id="svgLeft" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
+            <div class="result-badge result-badge-tick"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="result-badge result-badge-cross"><i class="fa-solid fa-circle-xmark"></i></div>
+        </div>
+
+        <div class="four-line-box" id="boxRight" onclick="checkAnswer('right')">
+            <div class="arbi-text" id="textRight"></div>
+            <svg class="hw-canvas-svg" id="svgRight" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
+            <div class="result-badge result-badge-tick"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="result-badge result-badge-cross"><i class="fa-solid fa-circle-xmark"></i></div>
+        </div>
+    </div>
+
+    <button class="btn btn-green" id="nextBtn" style="background:#2c3e50; box-shadow:0 4px 0 #1a252f; display:none;" onclick="generateQuestion()">
+        അടുത്ത ചോദ്യം <i class="fa-solid fa-arrow-right"></i>
+    </button>
+</div>
+
+<script>
+let last30Words = [];
+let leftWord = null;
+let rightWord = null;
+let targetWord = null;
+let currentAudio = null;
+let gameActive = false;
+let timerInterval = null;
+let maxDuration = 30; // 30 സെക്കൻഡ്
+
+window.onload = function() {
+    loadDataFromJSON();
+}
+
+async function loadDataFromJSON() {
+    try {
+        let response = await fetch('data/data.json?t=' + Date.now());
+        let rawData = await response.json();
+        
+        if(rawData.madrassas) {
+            let mSelect = document.getElementById('madrasaSelect');
+            mSelect.innerHTML = '';
+            rawData.madrassas.forEach(m => {
+                let opt = document.createElement('option');
+                opt.value = m.name; opt.innerText = m.name;
+                mSelect.appendChild(opt);
+            });
+            window.schoolConfig = rawData.madrassas;
+            updateStudentDropdown();
+        }
+        
+        if(rawData.words && Array.isArray(rawData.words)) {
+            // 🌟 അഡ്മിൻ പാനലിൽ അവസാനം അപ്‌ലോഡ് ചെയ്ത 30 വാക്കുകൾ മാത്രം എടുക്കുന്നു
+            let totalWords = rawData.words;
+            last30Words = totalWords.slice(-30);
+        }
+    } catch (e) {
+        alert("ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല!");
+    }
+}
+
+function updateStudentDropdown() {
+    let currentMadrasa = document.getElementById('madrasaSelect').value;
+    let sSelect = document.getElementById('studentSelect');
+    sSelect.innerHTML = '';
+    if(window.schoolConfig) {
+        let found = window.schoolConfig.find(m => m.name === currentMadrasa);
+        if(found && found.students) {
+            found.students.forEach(student => {
+                let opt = document.createElement('option');
+                opt.value = student; opt.innerText = student;
+                sSelect.appendChild(opt);
+            });
+        }
+    }
+}
+
+function startGame() {
+    let student = document.getElementById('studentSelect').value;
+    if(!student) return alert("പേര് തിരഞ്ഞെടുക്കുക!");
+    if(last30Words.length < 2) return alert("ഗെയിം കളിക്കാൻ മിനിമം 2 വാക്കുകൾ എങ്കിലും അഡ്മിൻ പാനലിൽ വേണം!");
+    
+    document.getElementById('studentHeading').innerText = `👤 കുട്ടി: ${student}`;
+    document.getElementById('startOverlay').style.display = 'none';
+    document.getElementById('gameContent').style.display = 'block';
+    
+    generateQuestion();
+}
+
+// പുതിയ ചോദ്യം ഉണ്ടാക്കുന്നു (റാണ്ടം 2 വാക്കുകൾ)
+function generateQuestion() {
+    gameActive = true;
+    document.getElementById('nextBtn').style.display = 'none';
+    document.getElementById('timerContainer').style.display = 'block';
+    
+    // ബോക്സുകൾ റീസെറ്റ് ചെയ്യുന്നു
+    ['Left', 'Right'].forEach(side => {
+        let box = document.getElementById('box' + side);
+        box.className = 'four-line-box';
+        box.querySelector('.arbi-text').classList.remove('revealed');
+        document.getElementById('svg' + side).innerHTML = '';
+    });
+
+    // 30 വാക്കുകളിൽ നിന്ന് റാൻഡമായി 2 വാക്കുകൾ തിരഞ്ഞെടുക്കുന്നു
+    let shuffled = [...last30Words].sort(() => 0.5 - Math.random());
+    leftWord = shuffled[0];
+    rightWord = shuffled[1];
+    
+    // ഈ രണ്ടെണ്ണത്തിൽ നിന്ന് ഒന്നിനെ 'ശരിയുത്തരം' (Target) ആക്കുന്നു
+    targetWord = Math.random() > 0.5 ? leftWord : rightWord;
+
+    // ടെക്സ്റ്റുകൾ സെറ്റ് ചെയ്യുന്നു
+    document.getElementById('textLeft').innerText = leftWord.arbiText || '';
+    document.getElementById('textRight').innerText = rightWord.arbiText || '';
+
+    // ഓഡിയോ പ്ലേ ചെയ്യുന്നു & 30 സെക്കൻഡ് ടൈമർ തുടങ്ങുന്നു
+    playTargetAudio();
+    startTimer();
+}
+
+// ശബ്ദം പ്ലേ ചെയ്യാനും 30 സെക്കൻഡ് കൺട്രോൾ ചെയ്യാനും
+function playTargetAudio() {
+    if(!targetWord || !targetWord.audio) return;
+    if(currentAudio) currentAudio.pause();
+    
+    let audioPath = targetWord.audio;
+    if (!audioPath.startsWith('data/') && !audioPath.startsWith('http')) {
+        audioPath = 'data/' + audioPath;
+    }
+    
+    currentAudio = new Audio(audioPath + '?t=' + Date.now());
+    currentAudio.play();
+
+    // 🌟 കൃത്യം 30 സെക്കൻഡ് കഴിയുമ്പോൾ ഓഡിയോ നിർത്താൻ
+    setTimeout(() => {
+        if(currentAudio) currentAudio.pause();
+    }, 30000);
+}
+
+// 30 സെക്കൻഡ് പ്രോഗ്രസ് ബാർ ടൈമർ
+function startTimer() {
+    clearInterval(timerInterval);
+    let timeLeft = maxDuration;
+    let bar = document.getElementById('timerBar');
+    
+    timerInterval = setInterval(() => {
+        timeLeft -= 0.1;
+        let percentage = (timeLeft / maxDuration) * 100;
+        bar.style.width = percentage + '%';
+        
+        if(timeLeft <= 0) {
+            clearInterval(timerInterval);
+            if(gameActive) {
+                gameActive = false;
+                alert("⏰ സമയം കഴിഞ്ഞു! അടുത്ത ചോദ്യത്തിലേക്ക് പോകൂ.");
+                showCorrectAnswerAndHandwriting();
+            }
+        }
+    }, 100);
+}
+
+// കുട്ടി ഒരു ബോക്സിൽ ക്ലിക്ക് ചെയ്യുമ്പോൾ
+function checkAnswer(selectedSide) {
+    if(!gameActive) return;
+    gameActive = false;
+    clearInterval(timerInterval);
+    if(currentAudio) currentAudio.pause();
+
+    let selectedWord = (selectedSide === 'left') ? leftWord : rightWord;
+    let isCorrect = (selectedWord === targetWord);
+
+    let clickedBox = document.getElementById('box' + (selectedSide === 'left' ? 'Left' : 'Right'));
+    
+    if(isCorrect) {
+        clickedBox.classList.add('correct');
+    } else {
+        clickedBox.classList.add('wrong');
+    }
+
+    // ശരിയുത്തരവും ഹാൻഡ്‌റൈറ്റിംഗും കാണിക്കുന്നു
+    showCorrectAnswerAndHandwriting();
+}
+
+// ശരിയുത്തരം കാണിക്കുകയും ഹാൻഡ്‌റൈറ്റിംഗ് വരയ്ക്കുകയും ചെയ്യുന്നു
+function showCorrectAnswerAndHandwriting() {
+    document.getElementById('timerContainer').style.display = 'none';
+    document.getElementById('nextBtn').style.display = 'inline-block';
+
+    // ശരിയായ ബോക്സ് ഏതാണെന്ന് കണ്ടുപിടിക്കുന്നു
+    let correctSide = (targetWord === leftWord) ? 'Left' : 'Right';
+    let correctBox = document.getElementById('box' + correctSide);
+    
+    // എപ്പോഴും ശരിയായ ബോക്സിൽ ടിക്ക് മാർക്ക് ഉറപ്പാക്കുന്നു
+    correctBox.classList.add('correct');
+    correctBox.querySelector('.arbi-text').classList.add('revealed');
+
+    // ✍️ ഹാൻഡ്‌റൈറ്റിംഗ് അനിമേഷൻ വരയ്ക്കുന്നു
+    if(targetWord.writingPaths && targetWord.writingPaths.length > 0) {
+        animateHandwriting('svg' + correctSide, targetWord.writingPaths);
+    }
+}
+
+// ഒറിജിനൽ അഡ്മിൻ സ്റ്റൈൽ 16-ലൈൻ ഹാൻഡ്‌റൈറ്റിംഗ് അനിമേഷൻ ഫങ്ഷൻ
+function animateHandwriting(svgId, pathsData) {
+    let board = document.getElementById(svgId);
+    board.innerHTML = ""; 
+    let pIdx = 0;
+    
+    function drawNextPath() {
+        if(pIdx >= pathsData.length) return;
+        
+        let currentPathPoints = pathsData[pIdx];
+        if(!currentPathPoints || currentPathPoints.length === 0) {
+            pIdx++; drawNextPath(); return;
+        }
+        
+        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        let svgPathsArray = [];
+        
+        // അഡ്മിൻ പാനലിലെ അതേ 16-ലൈൻ കാലിഗ്രാഫി റിച്ച് ലുക്ക്
+        for(let i=0; i<16; i++) {
+            let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            p.setAttribute("transform", `translate(${(i-8)*0.4}, ${-(i-8)})`);
+            p.setAttribute("stroke", "#e74c3c"); // ചുവപ്പ് മഷി
+            p.setAttribute("stroke-width", "2.5");
+            p.setAttribute("fill", "none");
+            p.setAttribute("stroke-linecap", "round");
+            g.appendChild(p);
+            svgPathsArray.push(p);
+        }
+        board.appendChild(g);
+        
+        let ptIdx = 0;
+        let dStr = `M ${currentPathPoints[0].x} ${currentPathPoints[0].y}`;
+        
+        function tracePoints() {
+            if(ptIdx >= currentPathPoints.length) {
+                pIdx++;
+                setTimeout(drawNextPath, 100);
+                return;
+            }
+            
+            let pt = currentPathPoints[ptIdx];
+            if(ptIdx === 0) dStr = `M ${pt.x} ${pt.y}`;
+            else dStr += ` L ${pt.x} ${pt.y}`;
+            
+            svgPathsArray.forEach(p => p.setAttribute("d", dStr));
+            ptIdx++;
+            requestAnimationFrame(tracePoints);
+        }
+        tracePoints();
+    }
+    drawNextPath();
+}
+</script>
+
+</body>
+</html>
