@@ -1,493 +1,548 @@
 <!DOCTYPE html>
 <html lang="ml">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>സൗണ്ട് ബുക്ക് - കുട്ടികളുടെ പാനല്‍</title>
-    <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; margin: 0; padding: 0; user-select: none; }
-        .screen { display: none; width: 100%; min-height: 100vh; padding: 15px; position: relative; }
-        .active-screen { display: flex; flex-direction: column; align-items: center; }
-        
-        /* മെനു സ്റ്റൈലുകൾ */
-        h1 { color: #2c3e50; font-size: 24px; margin-bottom: 5px; text-align: center; }
-        h3 { color: #7f8c8d; margin-top: 0; font-size: 16px; }
-        .menu-box { background: white; width: 100%; max-width: 400px; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: center; margin-top: 15px; }
-        select { width: 100%; padding: 12px; font-size: 16px; border-radius: 8px; border: 2px solid #bdc3c7; margin-bottom: 15px; background: #fff; }
-        
-        button { background: #3498db; color: white; border: none; padding: 14px; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; margin: 8px 0; box-shadow: 0 3px 6px rgba(0,0,0,0.1); transition: 0.2s; }
-        button:active { transform: scale(0.98); }
-        .btn-green { background: #2ecc71; }
-        .btn-purple { background: #9b59b6; }
-        
-        /* ആനിമേഷൻ SVG ലെയർ */
-        #quizWriteEngine { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
-        
-        .controls-bar { width: 100%; max-width: 600px; display: flex; gap: 10px; margin-top: 10px; }
-        
-        /* 🎮 ക്വിസ്സ് ഗെയിം സ്റ്റൈലുകൾ */
-        .quiz-box { background: white; width: 100%; max-width: 500px; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; margin-top: 10px; }
-        .quiz-canvas-area { position: relative; width: 100%; height: 260px; background: #fff; border: 3px solid #9b59b6; border-radius: 8px; margin-bottom: 15px; box-shadow: inset 0 0 10px rgba(0,0,0,0.1); }
-        .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; margin-top: 10px; }
-        .quiz-opt-btn { background: #f39c12; color: white; padding: 18px; font-size: 22px; font-family: 'Traditional Arabic', Arial; direction: rtl; border-radius: 8px; box-shadow: 0 3px 6px rgba(0,0,0,0.1); }
-        .quiz-opt-btn:active { background: #d35400; }
-        .zones-disabled { pointer-events: none; opacity: 0.6; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>വേർഡ് ആപ്പ് - പ്രോ ലൈവ് റൂം</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+    --arabic-font-size: 65px;   
+    --box-left-move: 0px;       
+    --box-top-move: 2px;        
+}
 
-        /* ഇൻഫോ ബാർ */
-        .game-status-bar { display: flex; justify-content: space-between; width: 100%; max-width: 500px; background: #34495e; color: white; padding: 10px 15px; border-radius: 8px; margin-bottom: 10px; font-weight: bold; font-size: 14px; }
-        
-        /* ലോഡിംഗ് ലെയർ */
-        .loading-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; font-size: 18px; font-weight: bold; color: #2c3e50; }
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; margin: 0; padding: 10px; text-align: center; user-select: none; height: 100vh; overflow: hidden; }
 
-        /* 🏆 സർട്ടിഫിക്കറ്റ് ഡിസൈൻ */
-        .certificate-card { background: white; border: 10px double #b8860b; padding: 30px; border-radius: 15px; width: 100%; max-width: 600px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.15); margin-top: 20px; position: relative; background-image: radial-gradient(#fffdf0 20%, transparent 20%), radial-gradient(#fffdf0 20%, transparent 20%); background-size: 10px 10px; background-position: 0 0, 5px 5px; background-color: #faf7e6; }
-        .cert-title { font-size: 28px; color: #b8860b; margin: 0 0 10px 0; font-family: 'Georgia', serif; letter-spacing: 2px; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
-        .cert-body { font-size: 16px; color: #333; line-height: 1.6; margin: 20px 0; }
-        .cert-highlight { font-size: 22px; color: #2c3e50; font-weight: bold; border-bottom: 2px dashed #b8860b; padding-bottom: 3px; display: inline-block; margin: 5px 0; }
-        .cert-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; background: rgba(255,255,255,0.7); padding: 12px; border-radius: 8px; border: 1px solid #e2dbb6; margin-top: 15px; text-align: left; font-size: 14px; }
-        .cert-footer-btn { margin-top: 25px; background: #b8860b; }
-    </style>
+.container { 
+    max-width: 98%; 
+    margin: 0 auto; 
+    background: white; 
+    padding: 12px; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    border-top: 5px solid #2ecc71; 
+    height: 95vh; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+    position: relative; 
+}
+
+h2 { color: #2c3e50; margin: 0; font-size: 20px; }
+.header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
+
+/* 🖋️ രണ്ട് ഫോർ ലൈൻ ബോക്സുകൾ */
+.four-lines-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin: 8px 0;
+    width: 100%;
+}
+
+.four-line-box {
+    flex: 1;
+    height: 160px; 
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    background-image: 
+        linear-gradient(#e74c3c 1px, transparent 1px), 
+        linear-gradient(#3498db 1px, transparent 1px), 
+        linear-gradient(#3498db 1px, transparent 1px), 
+        linear-gradient(#e74c3c 1px, transparent 1px);
+    background-size: 100% 160px;
+    background-position: 0 40px, 0 70px, 0 100px, 0 130px;
+    background-repeat: no-repeat;
+}
+
+/* 🖋️ താഴത്തെ പ്ലെയിൻ ഹാൻഡ്‌റൈറ്റിംഗ് ബോർഡ് */
+.writing-board-section {
+    margin-top: 5px;
+    border-top: 2px dashed #bdc3c7;
+    padding-top: 5px;
+}
+.writing-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #e67e22;
+    text-align: left;
+    margin-bottom: 3px;
+}
+.full-width-board {
+    width: 100%;
+    height: 160px; 
+    background: #fff;
+    border: 2px solid #e67e22;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.hw-canvas-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.arbi-text {
+    font-size: var(--arabic-font-size);
+    font-family: 'Traditional Arabic', 'Amiri', sans-serif;
+    color: #2c3e50;
+    direction: rtl;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    transform: translate(var(--box-left-move), var(--box-top-move)); 
+}
+
+.result-badge { position: absolute; top: 10px; right: 10px; font-size: 35px; z-index: 10; display: none; }
+.result-badge-tick { color: #2ecc71; }
+.timer-container { width: 100%; background: #ddd; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+.timer-bar { height: 100%; background: #e74c3c; width: 100%; transition: width 0.1s linear; }
+
+/* 🛠️ ലൈവ് ഡ്രാഗബിൾ ടൂൾ ബോക്സ് സ്റ്റൈൽ */
+.alignment-controller {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: rgba(44, 62, 80, 0.95);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    z-index: 10000;
+    width: 170px;
+    text-align: left;
+    font-size: 11px;
+}
+.drag-header {
+    padding: 3px;
+    cursor: move;
+    background-color: #2980b9;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+.alignment-controller label { color: #bdc3c7; margin-top: 4px; font-size: 10px; display: flex; justify-content: space-between;}
+.alignment-controller input { width: 100%; margin: 2px 0; }
+
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    body { padding: 4px; }
+    .container { height: 97vh; padding: 6px; }
+    h2 { font-size: 16px; }
+    .header-area h3 { font-size: 13px; margin: 0; }
+    
+    .four-line-box { 
+        height: 105px; 
+        background-size: 100% 105px;
+        background-position: 0 25px, 0 45px, 0 65px, 0 85px;
+    }
+    .full-width-board { height: 105px; }
+    .writing-board-section { margin-top: 2px; padding-top: 2px; }
+    .writing-title { font-size: 12px; margin-bottom: 1px; }
+}
+
+.overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; }
+.btn-blue { background: #3498db; box-shadow: 0 4px 0 #2980b9; margin-top: 15px; width: auto; padding: 12px 30px; display: inline-block; }
+</style>
 </head>
 <body>
 
-    <div id="loadingLayer" class="loading-layer">
-        <span>🔄 പാഠപുസ്തക വിവരങ്ങൾ ശേഖരിക്കുന്നു...</span>
-    </div>
+<div class="alignment-controller" id="liveTool" style="display:none;">
+    <div class="drag-header" id="dragHandle"><i class="fa-solid fa-arrows-up-down-left-right"></i> ഇവിടെ പിടിച്ചു നീക്കുക</div>
+    
+    <label>വലിപ്പം: <span id="valSize">65px</span></label>
+    <input type="range" id="sliderSize" min="20" max="100" value="65" oninput="adjustText()">
+    
+    <label>ഉയരം: <span id="valTop">2px</span></label>
+    <input type="range" id="sliderTop" min="-40" max="40" value="2" oninput="adjustText()">
+    
+    <label>ഇടത്/വലത്: <span id="valLeft">0px</span></label>
+    <input type="range" id="sliderLeft" min="-80" max="80" value="0" oninput="adjustText()">
+</div>
 
-    <div id="loginScreen" class="screen active-screen">
-        <div class="menu-box" style="border-top: 5px solid #3498db;">
-            <h1>📖 ഡിജിറ്റൽ സൗണ്ട് ബുക്ക്</h1>
-            <h3>വിദ്യാർത്ഥികളുടെ പാനൽ</h3>
-            <hr style="border: 1px dashed #eee; margin: 15px 0;">
-            
-            <label style="display:block; text-align:left; font-weight:bold; margin-bottom:5px; color:#34495e;">🏫 മദ്രസ തിരഞ്ഞെടുക്കുക:</label>
-            <select id="madrasaSelect" onchange="onMadrasaChanged()"></select>
-            
-            <label style="display:block; text-align:left; font-weight:bold; margin-bottom:5px; color:#34495e;">👤 കുട്ടിയുടെ പേര്:</label>
-            <select id="studentSelect"></select>
-            
-            <button class="btn-green" onclick="enterToMainMenu()">തുടങ്ങുക 🚀</button>
-        </div>
-    </div>
-
-    <div id="mainMenuScreen" class="screen">
-        <div class="menu-box" style="border-top: 5px solid #2ecc71; max-width: 450px;">
-            <h2 id="welcomeText" style="color:#2c3e50; margin-top:0;">ഹലോ</h2>
-            <div id="studentScoreDisplay" style="font-weight: bold; color: #e67e22; margin-bottom: 10px; font-size: 15px;">നിലവിലെ പോയിന്റ്: 1000</div>
-            <p style="color:#7f8c8d; font-size:14px;">ക്വിസ്സ് ഗെയിം കളിക്കാൻ താഴെയുള്ള ബട്ടൺ അമർത്തുക.</p>
-            <hr style="border: 1px dashed #eee; margin: 15px 0;">
-            
-            <button class="btn-green" onclick="startQuizMode()">🎮 ക്വിസ്സ് ഗെയിം കളിക്കുക 🚀</button>
-            
-            <button style="background:#7f8c8d; margin-top:20px; font-size:14px; padding:10px;" onclick="showScreen('loginScreen')">🔙 പ്രൊഫൈൽ മാറ്റുക</button>
-        </div>
-    </div>
-
-    <div id="quizScreen" class="screen">
-        <h2 style="margin:5px 0; color:#e67e22;">🎮 കേട്ട് കണ്ടെത്തുക ക്വിസ്സ്</h2>
+<div id="startOverlay" class="overlay-screen">
+    <h1><i class="fa-solid fa-display fa-2x" style="color:#2ecc71; margin-bottom:10px; display:block;"></i> വേർഡ് ആപ്പ് സ്മാർട്ട് ലൈവ് 🪄</h1>
+    <div style="width:100%; max-width:350px;">
+        <label style="color:white;">🏫 മദ്രസ തിരഞ്ഞെടുക്കുക:</label>
+        <select id="madrasaSelect" onchange="updateStudentDropdown()"></select>
         
-        <div class="game-status-bar">
-            <span id="quizProgressText">ചോദ്യം: 0 / 0</span>
-            <span id="gamePointsText">🎯 പോയിന്റ്: 1000</span>
-        </div>
+        <label style="color:white;">👤 കുട്ടിയുടെ പേര്:</label>
+        <select id="studentSelect"></select>
         
-        <div class="quiz-box">
-            <div class="quiz-canvas-area">
-                <div style="position:absolute; top:40%; left:0; width:100%; text-align:center; color:#bdc3c7; font-size:14px; font-weight:bold;" id="quizCanvasPlaceholder">ഉത്തരം ശരിയായാൽ ഇവിടെ എഴുതി കാണിക്കും!</div>
-                <svg id="quizWriteEngine" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
-            </div>
+        <button class="btn btn-green" onclick="startGame()">🚀 ക്ലാസ്സ് ആരംഭിക്കുക</button>
+    </div>
+</div>
 
-            <button class="btn-purple" style="padding:12px; font-size:15px; margin-bottom:10px;" onclick="replayQuizAudio()">🔊 ശബ്ദം വീണ്ടും കേൾക്കുക</button>
-            
-            <div class="quiz-options" id="quizOptionsContainer"></div>
+<div class="container" id="gameContent" style="display:none;">
+    <div class="header-area">
+        <h3 id="studentHeading" style="color:#7f8c8d; font-size: 14px;">👤 കുട്ടി: </h3>
+        <h2>ശ്രദ്ധിച്ചു കേൾക്കുക, എഴുതുന്നത് നോക്കുക! 🎧🖋️</h2>
+        <span style="color:#aaa; font-size:11px;" id="modeIndicator">Smart Mode</span>
+    </div>
+
+    <div class="timer-container" id="timerContainer">
+        <div class="timer-bar" id="timerBar"></div>
+    </div>
+
+    <div class="four-lines-container">
+        <div class="four-line-box" id="boxLeft">
+            <div class="arbi-text" id="textLeft"></div>
+            <div class="result-badge" id="tickLeft"><i class="fa-solid fa-circle-check result-badge-tick"></i></div>
         </div>
 
-        <div class="controls-bar" style="max-width:500px;">
-            <button style="background:#7f8c8d; padding:10px; font-size:14px;" onclick="quitQuiz()">❌ ക്വിസ്സ് നിർത്തുക</button>
+        <div class="four-line-box" id="boxRight">
+            <div class="arbi-text" id="textRight"></div>
+            <div class="result-badge" id="tickRight"><i class="fa-solid fa-circle-check result-badge-tick"></i></div>
         </div>
     </div>
 
-    <div id="certificateScreen" class="screen">
-        <div class="certificate-card">
-            <div class="cert-title">🏆 WINNER CERTIFICATE 🏆</div>
-            <div style="color: #b8860b; font-size: 14px; font-weight: bold;">DIGITAL SOUND BOOK CHAMPION</div>
-            <hr style="border: 1px solid #e2dbb6; margin: 15px 0;">
-            
-            <div class="cert-body">
-                ഈ മദ്രസ ക്വിസ്സ് മത്സരത്തിലെ എല്ലാ ചോദ്യങ്ങൾക്കും കൃത്യമായി ഉത്തരം നൽകി ഉന്നത വിജയം കൈവരിച്ച <br>
-                <span class="cert-highlight" id="certStudentName">കുട്ടിയുടെ പേര്</span> എന്ന വിദ്യാർത്ഥിക്ക് <br>
-                ആദരവോടെ സമർപ്പിക്കുന്ന ഡിജിറ്റൽ സർട്ടിഫിക്കറ്റ്.
-            </div>
-
-            <div class="cert-meta-grid">
-                <div><b>🏫 മദ്രസ:</b> <span id="certMadrasaName">-</span></div>
-                <div><b>📚 വിഷയം:</b> <span id="certSubject">-</span></div>
-                <div><b>📖 ക്ലാസ്സ് & പാർっと:</b> <span id="certClassPart">-</span></div>
-                <div><b>📝 പാഠം:</b> <span id="certChapter">-</span></div>
-                <div><b>⏱️ എടുത്ത സമയം:</b> <span id="certTimeTaken">-</span></div>
-                <div><b>💎 സ്കോർ:</b> <span id="certFinalPoints">-</span></div>
-            </div>
-
-            <div style="margin-top: 15px; font-size: 12px; color: #7f8c8d; text-align: right;" id="certDateDisplay">തീയതി: --/--/----</div>
-
-            <button class="btn-green cert-footer-btn" onclick="showScreen('loginScreen')">പൂർത്തിയായി 🏁</button>
+    <div class="writing-board-section" id="writingSection" style="display:none;">
+        <div class="writing-title"><i class="fa-solid fa-pen-fancy"></i> എഴുതുന്ന രൂപം ശ്രദ്ധിക്കുക:</div>
+        <div class="full-width-board">
+            <svg class="hw-canvas-svg" id="svgWritingBoard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
         </div>
     </div>
+</div>
 
-    <audio id="audioPlayer" style="display:none;"></audio>
+<script>
+let fullBackupWords = []; // റീസ്റ്റാർട്ട് ചെയ്യാൻ ഒറിജിനൽ വാക്കുകൾ സൂക്ഷിക്കാൻ
+let last30Words = [];
+let leftWord = null;
+let rightWord = null;
+let targetWord = null;
+let currentAudio = null;
+let timerInterval = null;
+let maxDuration = 30;
+let audioContextUnlocked = false; // 🔊 ഓഡിയോ അൺലോക്ക് സ്റ്റാറ്റസ്
 
-    <script>
-        let bookData = { pages: [] };
-        let masterList = {};
-        let currentStudent = "";
-        let currentMadrasa = "";
+window.onload = function() {
+    loadDataFromJSON();
+    makeElementDraggable(document.getElementById("liveTool"));
+}
+
+function adjustText() {
+    let size = document.getElementById('sliderSize').value;
+    let top = document.getElementById('sliderTop').value;
+    let left = document.getElementById('sliderLeft').value;
+    
+    document.getElementById('valSize').innerText = size + 'px';
+    document.getElementById('valTop').innerText = top + 'px';
+    document.getElementById('valLeft').innerText = left + 'px';
+    
+    let texts = document.querySelectorAll('.arbi-text');
+    texts.forEach(txt => {
+        txt.style.fontSize = size + 'px';
+        txt.style.transform = `translate(${left}px, ${top}px)`;
+    });
+}
+
+function makeElementDraggable(elmnt) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    const handle = document.getElementById("dragHandle");
+    
+    if (handle) {
+        handle.onmousedown = dragMouseDown;
+        handle.ontouchstart = dragMouseDown;
+    } else {
+        elmnt.onmousedown = dragMouseDown;
+        elmnt.ontouchstart = dragMouseDown;
+    }
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        let clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+        let clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
         
-        let quizPool = [];
-        let currentQuizIdx = 0;
-        let correctQuizZone = null;
+        pos3 = clientX;
+        pos4 = clientY;
+        
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+        document.ontouchend = closeDragElement;
+        document.ontouchmove = elementDrag;
+    }
 
-        // 🎯 ടൈമർ & പോയിന്റ് വേരിയബിളുകൾ
-        let gameScore = 1000;
-        let scoreInterval = null;
-        let gameStartTime = null;
+    function elementDrag(e) {
+        e = e || window.event;
+        let clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
+        let clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
+        
+        pos1 = pos3 - clientX;
+        pos2 = pos4 - clientY;
+        pos3 = clientX;
+        pos4 = clientY;
+        
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        elmnt.style.right = "auto";
+    }
 
-        window.onload = function() {
-            loadDataFromBackend();
-        };
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+        document.ontouchend = null;
+        document.ontouchmove = null;
+    }
+}
 
-        async function loadDataFromBackend() {
-            let cacheBuster = Date.now(); 
-            try {
-                let r1 = await fetch(`./data/master_list.json?t=${cacheBuster}`);
-                if(r1.ok) masterList = await r1.json();
-                
-                let r2 = await fetch(`./data/data_book.json?t=${cacheBuster}`);
-                if(r2.ok) bookData = await r2.json();
-                
-                initProfileSelectors();
-            } catch(e) {
-                console.error("Error loading JSON:", e);
-            } finally {
-                document.getElementById('loadingLayer').style.display = 'none';
-            }
-        }
-
-        function initProfileSelectors() {
-            let mSel = document.getElementById('madrasaSelect');
-            mSel.innerHTML = "";
-            if (Object.keys(masterList).length === 0) {
-                mSel.innerHTML = "<option>ഡാറ്റ ലഭ്യമല്ല</option>";
-                return;
-            }
-            Object.keys(masterList).sort().forEach(m => {
+async function loadDataFromJSON() {
+    try {
+        let response = await fetch('data/data.json?t=' + Date.now());
+        let rawData = await response.json();
+        
+        if(rawData.madrassas) {
+            let mSelect = document.getElementById('madrasaSelect');
+            mSelect.innerHTML = '';
+            rawData.madrassas.forEach(m => {
                 let opt = document.createElement('option');
-                opt.value = m; opt.innerText = m; mSel.appendChild(opt);
+                opt.value = m.name; opt.innerText = m.name;
+                mSelect.appendChild(opt);
             });
-            onMadrasaChanged();
+            window.schoolConfig = rawData.madrassas;
+            updateStudentDropdown();
         }
+        
+        if(rawData.words && Array.isArray(rawData.words)) {
+            fullBackupWords = rawData.words.slice(-30); // ഒറിജിനൽ ബാക്കപ്പ് എടുക്കുന്നു
+            last30Words = [...fullBackupWords];
+        }
+    } catch (e) {
+        alert("ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല!");
+    }
+}
 
-        function onMadrasaChanged() {
-            let m = document.getElementById('madrasaSelect').value;
-            let sSel = document.getElementById('studentSelect');
-            sSel.innerHTML = "";
-            if(!m || !masterList[m]) return;
-            masterList[m].sort().forEach(s => {
+function updateStudentDropdown() {
+    let currentMadrasa = document.getElementById('madrasaSelect').value;
+    let sSelect = document.getElementById('studentSelect');
+    sSelect.innerHTML = '';
+    if(window.schoolConfig) {
+        let found = window.schoolConfig.find(m => m.name === currentMadrasa);
+        if(found && found.students) {
+            found.students.forEach(student => {
                 let opt = document.createElement('option');
-                opt.value = s; opt.innerText = s; sSel.appendChild(opt);
+                opt.value = student; opt.innerText = student;
+                sSelect.appendChild(opt);
             });
         }
+    }
+}
 
-        function showScreen(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active-screen'));
-            document.getElementById(id).classList.add('active-screen');
+// 🔊 ഗൂഗിൾ ക്രോം ഓഡിയോ പോളിസി അൺലോക്ക് ചെയ്യാൻ
+function unlockAudioContext() {
+    if (!audioContextUnlocked) {
+        let context = new (window.AudioContext || window.webkitAudioContext)();
+        if (context.state === 'suspended') {
+            context.resume();
         }
+        audioContextUnlocked = true;
+    }
+}
 
-        // 📅 ഇന്നത്തെ ഡേറ്റ് സ്ട്രിംഗ് രൂപത്തിൽ നൽകുന്ന ഫങ്ക്ഷൻ (ഉദാഹരണത്തിന്: "2026-06-23")
-        function getTodayDateString() {
-            let d = new Date();
-            let month = '' + (d.getMonth() + 1);
-            let day = '' + d.getDate();
-            let year = d.getFullYear();
-            if (month.length < 2) month = '0' + month;
-            if (day.length < 2) day = '0' + day;
-            return [year, month, day].join('-');
+function startGame() {
+    unlockAudioContext(); // ഇവിടെ ഓഡിയോ സിസ്റ്റം അൺലോക്കാകും
+    let student = document.getElementById('studentSelect').value;
+    if(!student) return alert("പേര് തിരഞ്ഞെടുക്കുക!");
+    if(last30Words.length < 2) return alert("മിനിമം 2 വാക്കുകൾ വേണം!");
+    
+    document.getElementById('studentHeading').innerText = `👤 കുട്ടി: ${student}`;
+    document.getElementById('startOverlay').style.display = 'none';
+    document.getElementById('gameContent').style.display = 'block';
+    document.getElementById('liveTool').style.display = 'block';
+    
+    generateQuestion();
+}
+
+// 🔄 കളി വീണ്ടും റീസ്റ്റാർട്ട് ചെയ്യാൻ
+function restartGame() {
+    last30Words = [...fullBackupWords]; // ലിസ്റ്റ് റീസെറ്റ് ചെയ്യുന്നു
+    document.getElementById('startOverlay').style.display = 'flex';
+    location.reload(); // ക്ലീൻ ആയി റീലോഡ് ചെയ്യുന്നു
+}
+
+function generateQuestion() {
+    // 🔄 കളി കഴിഞ്ഞാൽ ബട്ടൺ കാണിക്കാൻ
+    if(last30Words.length < 2) {
+        if(currentAudio) currentAudio.pause();
+        clearInterval(timerInterval);
+        document.getElementById('liveTool').style.display = 'none';
+        
+        document.getElementById('gameContent').innerHTML = `
+            <div style='margin-top:15vh;'>
+                <h2 style='color:#2ecc71; font-size:32px;'>🎉 എല്ലാ വാക്കുകളും കഴിഞ്ഞു! 🎉</h2>
+                <button class='btn btn-blue' onclick='restartGame()'><i class='fa-solid fa-rotate-right'></i> വീണ്ടും കളിക്കുക</button>
+            </div>
+        `;
+        return;
+    }
+
+    document.getElementById('tickLeft').style.display = 'none';
+    document.getElementById('tickRight').style.display = 'none';
+    document.getElementById('writingSection').style.display = 'none';
+    document.getElementById('svgWritingBoard').innerHTML = '';
+
+    let shuffled = [...last30Words].sort(() => 0.5 - Math.random());
+    leftWord = shuffled[0];
+    rightWord = shuffled[1];
+    
+    targetWord = Math.random() > 0.5 ? leftWord : rightWord;
+
+    document.getElementById('textLeft').innerText = leftWord.arbiText || '';
+    document.getElementById('textRight').innerText = rightWord.arbiText || '';
+
+    adjustText(); 
+    playTargetAudioLoop();
+    startTimer();
+}
+
+function playTargetAudioLoop() {
+    if(!targetWord || !targetWord.audio) return;
+    if(currentAudio) currentAudio.pause();
+    
+    let audioPath = targetWord.audio;
+    if (!audioPath.startsWith('data/') && !audioPath.startsWith('http')) {
+        audioPath = 'data/' + audioPath;
+    }
+    
+    currentAudio = new Audio(audioPath + '?t=' + Date.now());
+    currentAudio.loop = true; 
+    
+    // അൺലോക്ക് ഉറപ്പാക്കി പ്ലേ ചെയ്യുന്നു
+    let playPromise = currentAudio.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            console.log("ക്രോം ഓഡിയോ ബ്ലോക്ക് മാറ്റി പ്ലേ ചെയ്യാൻ ശ്രമിക്കുന്നു...", error);
+            // യൂസർ ഇന്ററാക്ഷൻ വഴി പ്ലേ ചെയ്യാൻ ബാക്കപ്പ്
+            document.addEventListener('click', function triggerAudio() {
+                currentAudio.play();
+                document.removeEventListener('click', triggerAudio);
+            }, { once: true });
+        });
+    }
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    let timeLeft = maxDuration;
+    let bar = document.getElementById('timerBar');
+    
+    timerInterval = setInterval(() => {
+        timeLeft -= 0.1;
+        let percentage = (timeLeft / maxDuration) * 100;
+        bar.style.width = percentage + '%';
+        
+        if(timeLeft <= 0) {
+            clearInterval(timerInterval);
+            handleTimeoutAndReveal();
         }
+    }, 100);
+}
 
-        function enterToMainMenu() {
-            currentMadrasa = document.getElementById('madrasaSelect').value;
-            currentStudent = document.getElementById('studentSelect').value;
-            if(!currentMadrasa || !currentStudent || currentMadrasa === "ഡാറ്റ ലഭ്യമല്ല") return alert("വിവരങ്ങൾ തിരഞ്ഞെടുക്കുക!");
-            
-            document.getElementById('welcomeText').innerText = `👤 ${currentStudent}`;
-            
-            // 🔄 ഒരു ദിവസം കഴിയുമ്പോൾ പോയിന്റ് Reset ചെയ്യുന്ന ലോജിക്
-            let todayStr = getTodayDateString();
-            let savedDate = localStorage.getItem(`score_date_${currentStudent}`);
-            let savedScore = localStorage.getItem(`score_${currentStudent}`);
-            
-            if (savedDate !== todayStr) {
-                // തീയതി മാറിയെങ്കിൽ അല്ലെങ്കിൽ ആദ്യമായാണെങ്കിൽ പോയിന്റ് 1000 ആയി മാറും
-                gameScore = 1000;
-                localStorage.setItem(`score_${currentStudent}`, gameScore);
-                localStorage.setItem(`score_date_${currentStudent}`, todayStr);
-            } else {
-                // ഒരേ ദിവസം തന്നെയാണെങ്കിൽ പഴയ പോയിന്റ് എടുക്കും
-                gameScore = savedScore ? parseInt(savedScore) : 1000;
-            }
-            
-            document.getElementById('studentScoreDisplay').innerText = `നിലവിലെ പോയിന്റ്: ${gameScore}`;
-            showScreen('mainMenuScreen');
+function handleTimeoutAndReveal() {
+    if(currentAudio) {
+        currentAudio.loop = false;
+        currentAudio.pause();
+    }
+
+    let correctSide = (targetWord === leftWord) ? 'Left' : 'Right';
+    document.getElementById('tick' + correctSide).style.display = 'block';
+    document.getElementById('writingSection').style.display = 'block';
+
+    last30Words = last30Words.filter(word => word !== targetWord);
+
+    if(targetWord.writingPaths && targetWord.writingPaths.length > 0) {
+        animateHandwritingWithPen('svgWritingBoard', targetWord.writingPaths);
+    } else {
+        setTimeout(generateQuestion, 3000);
+    }
+}
+
+function animateHandwritingWithPen(svgId, pathsData) {
+    let board = document.getElementById(svgId);
+    board.innerHTML = ""; 
+    
+    let penImg = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    penImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png"); 
+    penImg.setAttribute("width", "150");
+    penImg.setAttribute("height", "150");
+    penImg.setAttribute("style", "position: absolute; z-index: 100; pointer-events: none; transition: transform 0.05s linear;");
+    penImg.style.display = "none";
+    
+    let pIdx = 0;
+    
+    function drawNextPath() {
+        if(pIdx >= pathsData.length) {
+            penImg.style.display = "none";
+            setTimeout(generateQuestion, 3000);
+            return;
         }
-
-        function startQuizMode() {
-            try {
-                quizPool = [];
-                let visiblePages = bookData.pages ? bookData.pages.filter(p => p && !p.hidden) : [];
-                
-                visiblePages.forEach(page => {
-                    if(page && page.zones && Array.isArray(page.zones)) {
-                        page.zones.forEach(zone => {
-                            if (!zone) return;
-                            let rawText = zone.text ? String(zone.text).trim() : "";
-                            let rawAudio = zone.audioSrc ? String(zone.audioSrc).trim() : "";
-                            
-                            if(rawText !== "" && rawAudio !== "") {
-                                if (!rawAudio.startsWith('data/') && !rawAudio.startsWith('http')) {
-                                    rawAudio = 'data/' + rawAudio;
-                                }
-                                zone.audioSrc = rawAudio; 
-                                quizPool.push({ zone: zone, allPages: visiblePages });
-                            }
-                        });
-                    }
-                });
-
-                if(quizPool.length === 0) {
-                    return alert("⚠️ ക്വിസ്സ് നടത്താൻ ആവശ്യമായ അറബിക് വാക്കുകൾ ലഭ്യമല്ല!");
-                }
-
-                quizPool.sort(() => Math.random() - 0.5);
-                currentQuizIdx = 0;
-                
-                // ⏱️ ടൈമറും പോയിന്റും സ്റ്റാർട്ട് ചെയ്യുന്നു
-                gameStartTime = Date.now();
-                document.getElementById('gamePointsText').innerText = `🎯 പോയിന്റ്: ${gameScore}`;
-                
-                clearInterval(scoreInterval);
-                scoreInterval = setInterval(() => {
-                    if(gameScore > 0) {
-                        gameScore--;
-                        document.getElementById('gamePointsText').innerText = `🎯 പോയിന്റ്: ${gameScore}`;
-                    }
-                }, 1000);
-
-                showScreen('quizScreen');
-                loadQuizQuestion();
-            } catch (error) {
-                alert("ക്വിസ്സ് ലോഡ് ചെയ്യുന്നതിൽ ഒരു തകരാർ: " + error.message);
-            }
+        
+        let currentPathPoints = pathsData[pIdx];
+        if(!currentPathPoints || currentPathPoints.length === 0) {
+            pIdx++; drawNextPath(); return;
         }
-
-        function loadQuizQuestion() {
-            document.getElementById('quizWriteEngine').innerHTML = "";
-            document.getElementById('quizCanvasPlaceholder').style.display = "block";
-            document.getElementById('quizOptionsContainer').classList.remove('zones-disabled');
-            
-            let currentQuiz = quizPool[currentQuizIdx];
-            correctQuizZone = currentQuiz.zone;
-            
-            document.getElementById('quizProgressText').innerText = `ചോദ്യം: ${currentQuizIdx + 1} / ${quizPool.length}`;
-            replayQuizAudio();
-
-            let optionsText = [correctQuizZone.text.trim()];
-            let allTextWords = [];
-            
-            currentQuiz.allPages.forEach(p => {
-                if(p && p.zones) p.zones.forEach(z => {
-                    if(z && z.text && String(z.text).trim() !== "") allTextWords.push(String(z.text).trim());
-                });
-            });
-            
-            allTextWords = [...new Set(allTextWords)].filter(w => w !== correctQuizZone.text.trim());
-            allTextWords.sort(() => Math.random() - 0.5);
-            
-            for(let i=0; i<3; i++) {
-                if(allTextWords[i]) optionsText.push(allTextWords[i]);
-            }
-            optionsText.sort(() => Math.random() - 0.5);
-            
-            let container = document.getElementById('quizOptionsContainer');
-            container.innerHTML = "";
-            optionsText.forEach(txt => {
-                let btn = document.createElement('button');
-                btn.className = "quiz-opt-btn";
-                btn.innerText = txt;
-                btn.onclick = () => checkQuizAnswer(txt, btn);
-                container.appendChild(btn);
-            });
+        
+        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        let svgPathsArray = [];
+        
+        for(let i=0; i<16; i++) {
+            let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            p.setAttribute("transform", `translate(${(i-8)*0.4}, ${-(i-8)})`);
+            p.setAttribute("stroke", "#e74c3c"); 
+            p.setAttribute("stroke-width", "3");
+            p.setAttribute("fill", "none");
+            p.setAttribute("stroke-linecap", "round");
+            g.appendChild(p);
+            svgPathsArray.push(p);
         }
-
-        function replayQuizAudio() {
-            if(!correctQuizZone) return;
-            let player = document.getElementById('audioPlayer');
-            player.src = correctQuizZone.audioSrc + "?t=" + Date.now();
-            player.play();
-        }
-
-        function checkQuizAnswer(selectedText, btnElement) {
-            document.getElementById('quizOptionsContainer').classList.add('zones-disabled');
-            
-            if(selectedText === correctQuizZone.text.trim()) {
-                btnElement.style.background = "#2ecc71";
-                document.getElementById('quizCanvasPlaceholder').style.display = "none";
-                
-                // ✍️ അനിമേഷൻ ഒരൊറ്റ ഫങ്ക്ഷൻ വഴി സുരക്ഷിതമായി റൺ ചെയ്യുന്നു
-                if(correctQuizZone.writingPaths && correctQuizZone.writingPaths.length > 0) {
-                    animateQuizHandwritingSequential(correctQuizZone.writingPaths, 0, 1);
-                } else {
-                    setTimeout(() => { finishQuizQuestion(); }, 1500);
-                }
-            } else {
-                // ❌ തോറ്റാൽ മാത്രം ഇവിടെ വെച്ച് 10 പോയിന്റ് കുറയുന്നു
-                btnElement.style.background = "#e74c3c";
-                clearInterval(scoreInterval);
-                
-                gameScore = Math.max(0, gameScore - 10);
-                localStorage.setItem(`score_${currentStudent}`, gameScore);
-                localStorage.setItem(`score_date_${currentStudent}`, getTodayDateString()); // തീയതിയും ലോക്ക് ചെയ്യുന്നു
-                
-                alert("❌ ഉത്തരം തെറ്റാണ്! സാരമില്ല. 10 പോയിന്റ് നഷ്ടമായി. വീണ്ടും ലോഗിൻ ചെയ്ത് ആദ്യമേ ശ്രമിക്കൂ!");
-                showScreen('loginScreen');
-            }
-        }
-
-        // ✍️ അനിമേഷൻ ഫങ്ക്ഷൻ
-        function animateQuizHandwritingSequential(pathsData, pathIndex, currentPointIndex = 1) {
-            let svg = document.getElementById('quizWriteEngine');
-            
-            if(pathIndex === 0 && currentPointIndex === 1) {
-                svg.innerHTML = ""; 
-            }
-
-            if(pathIndex >= pathsData.length) {
-                let oldHand = svg.querySelector('image');
-                if(oldHand) oldHand.parentNode.removeChild(oldHand);
-
-                // ⏱️ മുഴുവൻ എഴുത്തും കണ്ട ശേഷം 2 സെക്കൻഡ് വെയിറ്റിംഗ്
-                setTimeout(() => {
-                    finishQuizQuestion();
-                }, 2000);
+        board.appendChild(g);
+        board.appendChild(penImg);
+        penImg.style.display = "block";
+        
+        let ptIdx = 0;
+        let dStr = `M ${currentPathPoints[0].x} ${currentPathPoints[0].y}`;
+        
+        function tracePoints() {
+            if(ptIdx >= currentPathPoints.length) {
+                pIdx++;
+                setTimeout(drawNextPath, 150);
                 return;
             }
-
-            let pathPoints = pathsData[pathIndex];
             
-            if(!pathPoints || !Array.isArray(pathPoints) || pathPoints.length === 0) {
-                animateQuizHandwritingSequential(pathsData, pathIndex + 1, 1);
-                return;
-            }
-
-            let g = svg.getElementById(`stroke-g-${pathIndex}`);
-            let paths = [];
+            let pt = currentPathPoints[ptIdx];
+            if(ptIdx === 0) dStr = `M ${pt.x} ${pt.y}`;
+            else dStr += ` L ${pt.x} ${pt.y}`;
             
-            if(currentPointIndex === 1) {
-                let existingHand = svg.querySelector('image');
-                if(existingHand) existingHand.parentNode.removeChild(existingHand);
-
-                g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                g.setAttribute("id", `stroke-g-${pathIndex}`);
-                
-                for(let i=0; i<16; i++) {
-                    let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    p.setAttribute("transform", `translate(${(i-8)*0.4}, ${-(i-8)})`);
-                    p.setAttribute("stroke", "#e74c3c"); 
-                    p.setAttribute("stroke-width", "3");
-                    p.setAttribute("fill", "none");
-                    p.setAttribute("stroke-linecap", "round");
-                    p.setAttribute("stroke-linejoin", "round");
-                    p.setAttribute("d", `M ${pathPoints[0].x} ${pathPoints[0].y}`);
-                    g.appendChild(p);
-                }
-                svg.appendChild(g);
-            }
-
-            if(g) {
-                paths = Array.from(g.querySelectorAll('path'));
-            }
-
-            let handImg = svg.querySelector('image');
-            if(!handImg) {
-                handImg = document.createElementNS("http://www.w3.org/2000/svg", "image");
-                handImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png");
-                handImg.setAttribute("width", "180");  
-                handImg.setAttribute("height", "180"); 
-                svg.appendChild(handImg);
-            }
+            svgPathsArray.forEach(p => p.setAttribute("d", dStr));
             
-            if(currentPointIndex === 1) {
-                handImg.setAttribute("x", pathPoints[0].x - 33);
-                handImg.setAttribute("y", pathPoints[0].y - 50);
-            }
+            penImg.setAttribute("x", pt.x - 33); 
+            penImg.setAttribute("y", pt.y - 50); 
 
-            // 🐢 എഴുത്തിന്റെ സ്പീഡ് കുറയ്ക്കാൻ ഈ വാല്യൂ കൂട്ടാം (12-ൽ നിന്നും 25 ആക്കി മാറ്റിയിട്ടുണ്ട്)
-            let speed = 50; 
-            
-            if(currentPointIndex < pathPoints.length) {
-                let currPt = pathPoints[currentPointIndex];
-                let dString = ` L ${currPt.x} ${currPt.y}`;
-                paths.forEach(p => p.setAttribute("d", p.getAttribute("d") + dString));
-                
-                handImg.setAttribute("x", currPt.x - 33);
-                handImg.setAttribute("y", currPt.y - 50);
-                
-                setTimeout(() => {
-                    animateQuizHandwritingSequential(pathsData, pathIndex, currentPointIndex + 1);
-                }, speed);
-            } else {
-                animateQuizHandwritingSequential(pathsData, pathIndex + 1, 1);
-            }
+            ptIdx++;
+            requestAnimationFrame(tracePoints);
         }
+        tracePoints();
+    }
+    drawNextPath();
+}
+</script>
 
-        function finishQuizQuestion() {
-            currentQuizIdx++;
-            if(currentQuizIdx < quizPool.length) {
-                loadQuizQuestion();
-            } else {
-                // 🎉 വിജയിച്ചു - ടൈമർ നിർത്തുന്നു. ഇവിടെ പോയിന്റ് കുറയ്ക്കുന്ന ലോജിക്കുകൾ ഒന്നും ഇല്ല!
-                clearInterval(scoreInterval);
-                localStorage.setItem(`score_${currentStudent}`, gameScore);
-                localStorage.setItem(`score_date_${currentStudent}`, getTodayDateString());
-                generateCertificate();
-            }
-        }
-
-        function generateCertificate() {
-            let totalSeconds = Math.floor((Date.now() - gameStartTime) / 1000);
-            let min = Math.floor(totalSeconds / 60);
-            let sec = totalSeconds % 60;
-            let timeString = `${min} മിനിറ്റ് ${sec} സെക്കന്റ്`;
-
-            let today = new Date();
-            let dateString = `${today.getDate()}/${today.getMonth()+1}/${today.getFullYear()}`;
-
-            document.getElementById('certStudentName').innerText = currentStudent;
-            document.getElementById('certMadrasaName').innerText = currentMadrasa;
-            document.getElementById('certSubject').innerText = bookData.subject || "അറബിക്";
-            document.getElementById('certClassPart').innerText = `${bookData.class || "-"} ആം ക്ലാസ്സ് (Part: ${bookData.part || "-"})`;
-            document.getElementById('certChapter').innerText = `${bookData.chapter || "-"} : ${bookData.chapterName || "-"}`;
-            document.getElementById('certTimeTaken').innerText = timeString;
-            document.getElementById('certFinalPoints').innerText = `${gameScore} Pts`;
-            document.getElementById('certDateDisplay').innerText = `തീയതി: ${dateString}`;
-
-            showScreen('certificateScreen');
-        }
-
-        function quitQuiz() {
-            clearInterval(scoreInterval);
-            document.getElementById('audioPlayer').pause();
-            showScreen('mainMenuScreen');
-        }
-    </script>
 </body>
 </html>
