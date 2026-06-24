@@ -1,459 +1,514 @@
 <!DOCTYPE html>
 <html lang="ml">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ഡിജിറ്റൽ സൗണ്ട് ബുക്ക് - സ്റ്റുഡന്റ് പാനൽ</title>
-    <style>
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body { font-family: 'Segoe UI', sans-serif; background: #1a252f; color: white; margin: 0; padding: 0; user-select: none; overflow-x: hidden; }
-        
-        .container { width: 100%; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        
-        h1 { font-size: 36px; color: #3498db; margin: 0 0 5px 0; text-align: center; }
-        p.subtitle { font-size: 18px; color: #bdc3c7; margin: 0 0 25px 0; text-align: center; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>വേർഡ് ആപ്പ് - പ്രോ ലൈവ് റൂം</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+    /* 🛠️ നിങ്ങൾ ആവശ്യപ്പെട്ട പുതിയ ഡിഫോൾട്ട് അളവുകൾ ഇവിടെ സെറ്റ് ചെയ്തിട്ടുണ്ട് */
+    --arabic-font-size: 65px;   
+    --box-left-move: 0px;       
+    --box-top-move: 2px;        
+}
 
-        /* ക്ലിക്ക് ചെയ്യാനുള്ള നിർദ്ദേശം കാണിക്കുന്ന ബോക്സ് */
-        #startOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 37, 47, 0.95); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
-        .start-btn { background: #2ecc71; color: white; font-size: 28px; padding: 20px 40px; border-radius: 50px; border: none; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+* { box-sizing: border-box; }
+body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; margin: 0; padding: 10px; text-align: center; user-select: none; height: 100vh; overflow: hidden; }
 
-        .workspace { display: flex; align-items: center; justify-content: center; gap: 30px; width: 100%; max-width: 1250px; margin-bottom: 25px; flex-wrap: wrap; }
-        
-        /* 📜 വാക്കുകൾ കാണിക്കുന്ന ഫോർ ലൈൻ ഡിസ്‌പ്ലേ ബോക്സുകൾ */
-        .word-four-line { 
-            position: relative;
-            width: 320px; 
-            height: 160px; 
-            background: #ffffff; 
-            border: 4px dashed #3498db; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            background-image: 
-                linear-gradient(#e74c3c 2px, transparent 2px),
-                linear-gradient(#3498db 2px, transparent 2px),
-                linear-gradient(#3498db 2px, transparent 2px),
-                linear-gradient(#e74c3c 2px, transparent 2px);
-            background-size: 100% 160px;
-            background-position: 0 35px, 0 65px, 0 95px, 0 125px;
-            background-repeat: no-repeat;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: 0.3s;
-        }
+.container { 
+    max-width: 98%; 
+    margin: 0 auto; 
+    background: white; 
+    padding: 12px; 
+    border-radius: 12px; 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+    border-top: 5px solid #2ecc71; 
+    height: 95vh; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: space-between; 
+    position: relative; 
+}
 
-        /* അറബിക് അക്ഷരങ്ങൾ വരകൾക്ക് മുകളിൽ കറക്റ്റ് ആയി വരാൻ */
-        .word-text {
-            font-size: 48px; 
-            font-weight: bold; 
-            color: #2c3e50; 
-            font-family: 'Traditional Arabic', 'Amiri', Arial, sans-serif;
-            text-align: center;
-            direction: rtl;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -62%); /* മുകളിലെ നീല വരയ്ക്ക് കറക്റ്റ് മുകളിലാക്കാൻ */
-            width: 100%;
-            z-index: 5;
-        }
-        
-        /* ⬜ നടുവിലെ ബ്ലാങ്ക് റൈറ്റിംഗ് പാഡ് */
-        .blank-pad-container { 
-            position: relative; 
-            width: 100%; 
-            max-width: 460px; 
-            height: 240px; 
-            background: #ffffff; 
-            border: 5px solid #3498db; 
-            border-radius: 12px; 
-            overflow: hidden; 
-            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-        }
-        
-        #dictPlaybackEngine { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+h2 { color: #2c3e50; margin: 0; font-size: 20px; }
+.header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
 
-        /* ✍️ പേന പിടിച്ച കൈ ചിത്രത്തിനുള്ള സ്റ്റൈൽ */
-        #writingHand {
-            position: absolute;
-            width: 75px;  
-            height: 75px;
-            pointer-events: none;
-            z-index: 20;
-            display: none;
-        }
+/* 🖋️ രണ്ട് ഫോർ ലൈൻ ബോക്സുകൾ */
+.four-lines-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    margin: 8px 0;
+    width: 100%;
+}
 
-        /* ടൈമറും കൺട്രോളുകളും */
-        .timer-container { font-size: 28px; font-weight: bold; color: #e74c3c; margin-bottom: 25px; background: rgba(0,0,0,0.3); padding: 10px 30px; border-radius: 50px; border: 2px solid #e74c3c; display: flex; align-items: center; gap: 15px; }
-        .controls-bar { width: 100%; max-width: 600px; display: flex; gap: 15px; justify-content: center; margin-top: 10px; }
-        button { color: white; border: none; padding: 16px 30px; font-size: 20px; font-weight: bold; border-radius: 12px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.2s; min-width: 150px; }
-        
-        .btn-orange { background: #e67e22; }
-        .btn-green { background: #2ecc71; }
-        .btn-purple { background: #9b59b6; }
+.four-line-box {
+    flex: 1;
+    height: 160px; 
+    background: #fff;
+    border: 2px solid #cbd5e1;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    background-image: 
+        linear-gradient(#e74c3c 1px, transparent 1px), 
+        linear-gradient(#3498db 1px, transparent 1px), 
+        linear-gradient(#3498db 1px, transparent 1px), 
+        linear-gradient(#e74c3c 1px, transparent 1px);
+    background-size: 100% 160px;
+    background-position: 0 40px, 0 70px, 0 100px, 0 130px;
+    background-repeat: no-repeat;
+}
 
-        .big-answer { font-size: 38px; font-weight: bold; color: #2ecc71; margin: 15px 0; text-align: center; display: none;}
-        .tick-timer { font-size: 30px; color: #2ecc71; font-weight: bold; margin-bottom: 20px; animation: pulse 1s infinite; display: none; }
+/* 🖋️ താഴത്തെ പ്ലെയിൻ ഹാൻഡ്‌റൈറ്റിംഗ് ബോർഡ് */
+.writing-board-section {
+    margin-top: 5px;
+    border-top: 2px dashed #bdc3c7;
+    padding-top: 5px;
+}
+.writing-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: #e67e22;
+    text-align: left;
+    margin-bottom: 3px;
+}
+.full-width-board {
+    width: 100%;
+    height: 160px; 
+    background: #fff;
+    border: 2px solid #e67e22;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+}
 
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        .loading { font-size: 24px; color: #3498db; font-weight: bold; }
+.hw-canvas-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 5;
+    pointer-events: none;
+}
 
-        @media (max-width: 768px) {
-            .workspace { flex-direction: column; gap: 20px; }
-            .word-four-line { width: 100%; height: 140px; background-size: 100% 140px; background-position: 0 30px, 0 55px, 0 80px, 0 105px; }
-            .blank-pad-container { max-width: 100%; height: 200px; }
-        }
-    </style>
+.arbi-text {
+    font-size: var(--arabic-font-size);
+    font-family: 'Traditional Arabic', 'Amiri', sans-serif;
+    color: #2c3e50;
+    direction: rtl;
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    white-space: nowrap;
+    transform: translate(var(--box-left-move), var(--box-top-move)); 
+}
+
+.result-badge { position: absolute; top: 10px; right: 10px; font-size: 35px; z-index: 10; display: none; }
+.result-badge-tick { color: #2ecc71; }
+.timer-container { width: 100%; background: #ddd; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+.timer-bar { height: 100%; background: #e74c3c; width: 100%; transition: width 0.1s linear; }
+
+/* 🛠️ ഡ്രാഗ് ചെയ്യാൻ പറ്റുന്ന പുതിയ അലൈൻമെന്റ് ടൂൾ സ്റ്റൈൽ */
+.alignment-controller {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    background: rgba(44, 62, 80, 0.95);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    z-index: 10000;
+    width: 170px;
+    text-align: left;
+    font-size: 11px;
+}
+/* ഡ്രാഗ് ചെയ്യാൻ പിടിക്കുന്ന ഹെഡർ ഭാഗം */
+.drag-header {
+    padding: 3px;
+    cursor: move;
+    background-color: #2980b9;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+.alignment-controller label { color: #bdc3c7; margin-top: 4px; font-size: 10px; display: flex; justify-content: space-between;}
+.alignment-controller input { width: 100%; margin: 2px 0; }
+
+@media screen and (max-height: 500px) and (orientation: landscape) {
+    body { padding: 4px; }
+    .container { height: 97vh; padding: 6px; }
+    h2 { font-size: 16px; }
+    .header-area h3 { font-size: 13px; margin: 0; }
+    
+    .four-line-box { 
+        height: 105px; 
+        background-size: 100% 105px;
+        background-position: 0 25px, 0 45px, 0 65px, 0 85px;
+    }
+    .full-width-board { height: 105px; }
+    .writing-board-section { margin-top: 2px; padding-top: 2px; }
+    .writing-title { font-size: 12px; margin-bottom: 1px; }
+}
+
+.overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; }
+</style>
 </head>
 <body>
 
-    <div id="startOverlay" onclick="initApp()">
-        <div class="start-btn">▶️ ക്ലാസ്സ് ആരംഭിക്കുക</div>
-        <p style="color: #bdc3c7; margin-top: 15px; font-size: 16px;">(ഓഡിയോ കൃത്യമായി കേൾക്കാൻ ഇവിടെ ക്ലിക്ക് ചെയ്യുക)</p>
+<div class="alignment-controller" id="liveTool" style="display:none;">
+    <div class="drag-header" id="dragHandle"><i class="fa-solid fa-arrows-堅t"></i> ഇവിടെ പിടിച്ചു നീക്കുക</div>
+    
+    <label>വലിപ്പം: <span id="valSize">65px</span></label>
+    <input type="range" id="sliderSize" min="20" max="100" value="65" oninput="adjustText()">
+    
+    <label>ഉയരം: <span id="valTop">2px</span></label>
+    <input type="range" id="sliderTop" min="-40" max="40" value="2" oninput="adjustText()">
+    
+    <label>ഇടത്/വലത്: <span id="valLeft">0px</span></label>
+    <input type="range" id="sliderLeft" min="-80" max="80" value="0" oninput="adjustText()">
+</div>
+
+<div id="startOverlay" class="overlay-screen">
+    <h1><i class="fa-solid fa-display fa-2x" style="color:#2ecc71; margin-bottom:10px; display:block;"></i> വേർഡ് ആപ്പ് സ്മാർട്ട് ലൈവ് 🪄</h1>
+    <div style="width:100%; max-width:350px;">
+        <label style="color:white;">🏫 മദ്രസ തിരഞ്ഞെടുക്കുക:</label>
+        <select id="madrasaSelect" onchange="updateStudentDropdown()"></select>
+        
+        <label style="color:white;">👤 കുട്ടിയുടെ പേര്:</label>
+        <select id="studentSelect"></select>
+        
+        <button class="btn btn-green" onclick="startGame()">🚀 ക്ലാസ്സ് ആരംഭിക്കുക</button>
+    </div>
+</div>
+
+<div class="container" id="gameContent" style="display:none;">
+    <div class="header-area">
+        <h3 id="studentHeading" style="color:#7f8c8d; font-size: 14px;">👤 കുട്ടി: </h3>
+        <h2>ശ്രദ്ധിച്ചു കേൾക്കുക, എഴുതുന്നത് നോക്കുക! 🎧🖋️</h2>
+        <span style="color:#aaa; font-size:11px;" id="modeIndicator">Smart Mode</span>
     </div>
 
-    <div class="container">
-        <div id="loadingText" class="loading" style="display:none;">🔄 അഡ്മിൻ പാനലിൽ നിന്നുള്ള ഡാറ്റയും ഓഡിയോയും ലോഡ് ചെയ്യുന്നു...</div>
+    <div class="timer-container" id="timerContainer">
+        <div class="timer-bar" id="timerBar"></div>
+    </div>
 
-        <div id="mainContent" style="display:none; width: 100%; flex-direction: column; align-items: center;">
-            <h1>🎓 ഡിജിറ്റൽ കേട്ടെഴുത്ത് പാനൽ</h1>
-            <p class="subtitle">ശബ്ദം ശ്രദ്ധിച്ച് കേട്ട് ഫോർ ലൈനിൽ ശരിയായ വാക്ക് കണ്ടെത്തുക</p>
+    <div class="four-lines-container">
+        <div class="four-line-box" id="boxLeft">
+            <div class="arbi-text" id="textLeft"></div>
+            <div class="result-badge" id="tickLeft"><i class="fa-solid fa-circle-check result-badge-tick"></i></div>
+        </div>
 
-            <div class="workspace">
-                <div id="wordBox1" class="word-four-line">
-                    <span id="wordText1" class="word-text">???</span>
-                </div>
-
-                <div class="blank-pad-container" id="padArea">
-                    <svg id="dictPlaybackEngine" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
-                    <img id="writingHand" src="hand.png" alt="Hand">
-                </div>
-
-                <div id="wordBox2" class="word-four-line">
-                    <span id="wordText2" class="word-text">???</span>
-                </div>
-            </div>
-
-            <div id="mainTimerContainer" class="timer-container">
-                <span id="timerIcon">⏳</span>
-                <span id="timerText">ബാക്കി സമയം: 30 സെക്കൻഡ്</span>
-            </div>
-
-            <div id="bigAnswerText" class="big-answer"></div>
-            <div id="tickTimerText" class="tick-timer">📝 നോട്ട്ബുക്കിൽ ടിക്ക് ഇടൂ... (5)</div>
-
-            <div class="controls-bar">
-                <button id="btnPauseResume" class="btn-orange" onclick="togglePauseResume()">⏸️ Pause</button>
-                <button id="btnForceSkip" class="btn-purple" style="display:none;" onclick="startNewRound()">➡️ അടുത്ത വാക്ക്</button>
-            </div>
+        <div class="four-line-box" id="boxRight">
+            <div class="arbi-text" id="textRight"></div>
+            <div class="result-badge" id="tickRight"><i class="fa-solid fa-circle-check result-badge-tick"></i></div>
         </div>
     </div>
 
-    <audio id="audioPlayer" style="display:none;"></audio>
+    <div class="writing-board-section" id="writingSection" style="display:none;">
+        <div class="writing-title"><i class="fa-solid fa-pen-fancy"></i> എഴുതുന്ന രൂപം ശ്രദ്ധിക്കുക:</div>
+        <div class="full-width-board">
+            <svg class="hw-canvas-svg" id="svgWritingBoard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
+        </div>
+    </div>
+</div>
 
-    <script>
-        let wordAppData = { words: [] };
-        let allWords = [];
-        let currentTargetWord = null;
-        let timerId = null;
-        let audioIntervalId = null;
-        let selfCheckTimerId = null;
+<script>
+let last30Words = [];
+let leftWord = null;
+let rightWord = null;
+let targetWord = null;
+let currentAudio = null;
+let timerInterval = null;
+let maxDuration = 30;
+
+window.onload = function() {
+    loadDataFromJSON();
+    makeElementDraggable(document.getElementById("liveTool"));
+}
+
+function adjustText() {
+    let size = document.getElementById('sliderSize').value;
+    let top = document.getElementById('sliderTop').value;
+    let left = document.getElementById('sliderLeft').value;
+    
+    document.getElementById('valSize').innerText = size + 'px';
+    document.getElementById('valTop').innerText = top + 'px';
+    document.getElementById('valLeft').innerText = left + 'px';
+    
+    let texts = document.querySelectorAll('.arbi-text');
+    texts.forEach(txt => {
+        txt.style.fontSize = size + 'px';
+        txt.style.transform = `translate(${left}px, ${top}px)`;
+    });
+}
+
+// 🛠️ ടൂൾ ബോക്സ് ഡ്രാഗ് ചെയ്യാനുള്ള ഒറിജിനൽ ജാവാസ്ക്രിപ്റ്റ് ഫങ്ഷൻ (ലാപ്ടോപ്പ് + ടച്ച് സ്ക്രീൻ പിന്തുണ)
+function makeElementDraggable(elmnt) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    const handle = document.getElementById("dragHandle");
+    
+    if (handle) {
+        handle.onmousedown = dragMouseDown;
+        handle.ontouchstart = dragMouseDown;
+    } else {
+        elmnt.onmousedown = dragMouseDown;
+        elmnt.ontouchstart = dragMouseDown;
+    }
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        // ടച്ച് അല്ലെങ്കിൽ മൗസ് ക്ലിക്ക് വേർതിരിക്കുന്നു
+        let clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+        let clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
         
-        let timeLeft = 30;
-        let isPaused = false;
-        let animationLoopCount = 0; 
+        pos3 = clientX;
+        pos4 = clientY;
+        
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+        
+        document.ontouchend = closeDragElement;
+        document.ontouchmove = elementDrag;
+    }
 
-        function initApp() {
-            document.getElementById('startOverlay').style.display = 'none';
-            document.getElementById('loadingText').style.display = 'block';
-            loadWordAppData();
+    function elementDrag(e) {
+        e = e || window.event;
+        let clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
+        let clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
+        
+        pos1 = pos3 - clientX;
+        pos2 = pos4 - clientY;
+        pos3 = clientX;
+        pos4 = clientY;
+        
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        elmnt.style.right = "auto"; // റൈറ്റ് ലോക്ക് റീസെറ്റ് ചെയ്യുന്നു
+    }
+
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+        document.ontouchend = null;
+        document.ontouchmove = null;
+    }
+}
+
+async function loadDataFromJSON() {
+    try {
+        let response = await fetch('data/data.json?t=' + Date.now());
+        let rawData = await response.json();
+        
+        if(rawData.madrassas) {
+            let mSelect = document.getElementById('madrasaSelect');
+            mSelect.innerHTML = '';
+            rawData.madrassas.forEach(m => {
+                let opt = document.createElement('option');
+                opt.value = m.name; opt.innerText = m.name;
+                mSelect.appendChild(opt);
+            });
+            window.schoolConfig = rawData.madrassas;
+            updateStudentDropdown();
         }
-
-        async function loadWordAppData() {
-            try {
-                let r = await fetch(`./data/data.json?t=${Date.now()}`);
-                if(r.ok) {
-                    wordAppData = await r.json();
-                    extractLatestWords();
-                } else {
-                    document.getElementById('loadingText').innerText = "❌ data/data.json ഫയൽ കണ്ടെത്താനായില്ല!";
-                }
-            } catch(e) {
-                document.getElementById('loadingText').innerText = "❌ ഡാറ്റ ലോഡ് ചെയ്യുന്നതിൽ പിശക്!";
-            }
+        
+        if(rawData.words && Array.isArray(rawData.words)) {
+            last30Words = rawData.words.slice(-30);
         }
+    } catch (e) {
+        alert("ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല!");
+    }
+}
 
-        function extractLatestWords() {
-            allWords = [];
-            let source = wordAppData.words || wordAppData;
+function updateStudentDropdown() {
+    let currentMadrasa = document.getElementById('madrasaSelect').value;
+    let sSelect = document.getElementById('studentSelect');
+    sSelect.innerHTML = '';
+    if(window.schoolConfig) {
+        let found = window.schoolConfig.find(m => m.name === currentMadrasa);
+        if(found && found.students) {
+            found.students.forEach(student => {
+                let opt = document.createElement('option');
+                opt.value = student; opt.innerText = student;
+                sSelect.appendChild(opt);
+            });
+        }
+    }
+}
 
-            if(Array.isArray(source)) {
-                source.forEach(item => {
-                    allWords.push({
-                        word: item.arbiText || item.word || "", 
-                        malWord: item.mal || "",               
-                        audioSrc: item.audio ? `data/${item.audio}` : "", 
-                        path: item.writingPaths || null         
-                    });
-                });
-            }
+function startGame() {
+    let student = document.getElementById('studentSelect').value;
+    if(!student) return alert("പേര് തിരഞ്ഞെടുക്കുക!");
+    if(last30Words.length < 2) return alert("മിനിമം 2 വാക്കുകൾ വേണം!");
+    
+    document.getElementById('studentHeading').innerText = `👤 കുട്ടി: ${student}`;
+    document.getElementById('startOverlay').style.display = 'none';
+    document.getElementById('gameContent').style.display = 'block';
+    document.getElementById('liveTool').style.display = 'block';
+    
+    generateQuestion();
+}
 
-            if(allWords.length < 2) {
-                document.getElementById('loadingText').innerText = "❌ പാനലിൽ കുറഞ്ഞത് 2 വാക്കുകളെങ്കിലും വേണം!";
+function generateQuestion() {
+    if(last30Words.length < 2) {
+        if(currentAudio) currentAudio.pause();
+        clearInterval(timerInterval);
+        document.getElementById('liveTool').style.display = 'none';
+        document.getElementById('gameContent').innerHTML = "<h2 style='color:#2ecc71; margin-top:20vh; font-size:30px;'>🎉 എല്ലാ വാക്കുകളും കഴിഞ്ഞു! 🎉</h2>";
+        return;
+    }
+
+    document.getElementById('tickLeft').style.display = 'none';
+    document.getElementById('tickRight').style.display = 'none';
+    document.getElementById('writingSection').style.display = 'none';
+    document.getElementById('svgWritingBoard').innerHTML = '';
+
+    let shuffled = [...last30Words].sort(() => 0.5 - Math.random());
+    leftWord = shuffled[0];
+    rightWord = shuffled[1];
+    
+    targetWord = Math.random() > 0.5 ? leftWord : rightWord;
+
+    document.getElementById('textLeft').innerText = leftWord.arbiText || '';
+    document.getElementById('textRight').innerText = rightWord.arbiText || '';
+
+    adjustText(); // നിങ്ങൾ മാറ്റിയതോ അല്ലെങ്കിൽ പുതിയ ഡിഫോൾട്ടോ ആയ അളവുകൾ നിലനിർത്തുന്നു
+    playTargetAudioLoop();
+    startTimer();
+}
+
+function playTargetAudioLoop() {
+    if(!targetWord || !targetWord.audio) return;
+    if(currentAudio) currentAudio.pause();
+    
+    let audioPath = targetWord.audio;
+    if (!audioPath.startsWith('data/') && !audioPath.startsWith('http')) {
+        audioPath = 'data/' + audioPath;
+    }
+    
+    currentAudio = new Audio(audioPath + '?t=' + Date.now());
+    currentAudio.loop = true; 
+    currentAudio.play().catch(e => console.log("Audio Error", e));
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    let timeLeft = maxDuration;
+    let bar = document.getElementById('timerBar');
+    
+    timerInterval = setInterval(() => {
+        timeLeft -= 0.1;
+        let percentage = (timeLeft / maxDuration) * 100;
+        bar.style.width = percentage + '%';
+        
+        if(timeLeft <= 0) {
+            clearInterval(timerInterval);
+            handleTimeoutAndReveal();
+        }
+    }, 100);
+}
+
+function handleTimeoutAndReveal() {
+    if(currentAudio) {
+        currentAudio.loop = false;
+        currentAudio.pause();
+    }
+
+    let correctSide = (targetWord === leftWord) ? 'Left' : 'Right';
+    document.getElementById('tick' + correctSide).style.display = 'block';
+    document.getElementById('writingSection').style.display = 'block';
+
+    last30Words = last30Words.filter(word => word !== targetWord);
+
+    if(targetWord.writingPaths && targetWord.writingPaths.length > 0) {
+        animateHandwritingWithPen('svgWritingBoard', targetWord.writingPaths);
+    } else {
+        setTimeout(generateQuestion, 3000);
+    }
+}
+
+function animateHandwritingWithPen(svgId, pathsData) {
+    let board = document.getElementById(svgId);
+    board.innerHTML = ""; 
+    
+    let penImg = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    penImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png"); 
+    
+    /* 🖋️ നിങ്ങളുടെ ആവശ്യപ്രകാരം ഹാൻഡിന്റെ വലിപ്പം 150 ആക്കി മാറ്റി */
+    penImg.setAttribute("width", "150");
+    penImg.setAttribute("height", "150");
+    penImg.setAttribute("style", "position: absolute; z-index: 100; pointer-events: none; transition: transform 0.05s linear;");
+    penImg.style.display = "none";
+    
+    let pIdx = 0;
+    
+    function drawNextPath() {
+        if(pIdx >= pathsData.length) {
+            penImg.style.display = "none";
+            setTimeout(generateQuestion, 3000);
+            return;
+        }
+        
+        let currentPathPoints = pathsData[pIdx];
+        if(!currentPathPoints || currentPathPoints.length === 0) {
+            pIdx++; drawNextPath(); return;
+        }
+        
+        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        let svgPathsArray = [];
+        
+        for(let i=0; i<16; i++) {
+            let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            p.setAttribute("transform", `translate(${(i-8)*0.4}, ${-(i-8)})`);
+            p.setAttribute("stroke", "#e74c3c"); 
+            p.setAttribute("stroke-width", "3");
+            p.setAttribute("fill", "none");
+            p.setAttribute("stroke-linecap", "round");
+            g.appendChild(p);
+            svgPathsArray.push(p);
+        }
+        board.appendChild(g);
+        board.appendChild(penImg);
+        penImg.style.display = "block";
+        
+        let ptIdx = 0;
+        let dStr = `M ${currentPathPoints[0].x} ${currentPathPoints[0].y}`;
+        
+        function tracePoints() {
+            if(ptIdx >= currentPathPoints.length) {
+                pIdx++;
+                setTimeout(drawNextPath, 150);
                 return;
             }
-
-            document.getElementById('loadingText').style.display = 'none';
-            document.getElementById('mainContent').style.display = 'flex';
             
-            startNewRound();
-        }
-
-        function startNewRound() {
-            clearInterval(timerId);
-            clearInterval(audioIntervalId);
-            clearInterval(selfCheckTimerId);
-            document.getElementById('audioPlayer').pause();
-
-            isPaused = false;
-            timeLeft = 30;
-            animationLoopCount = 0;
-
-            document.getElementById('mainTimerContainer').style.display = 'flex';
-            document.getElementById('bigAnswerText').style.display = 'none';
-            document.getElementById('tickTimerText').style.display = 'none';
-            document.getElementById('btnPauseResume').style.display = 'block';
-            document.getElementById('btnPauseResume').className = "btn-orange";
-            document.getElementById('btnPauseResume').innerText = "⏸️ Pause";
-            document.getElementById('btnForceSkip').style.display = 'none';
-            document.getElementById('timerIcon').innerText = "⏳";
-            document.getElementById('dictPlaybackEngine').innerHTML = "";
-            document.getElementById('writingHand').style.display = 'none';
-
-            document.getElementById('wordBox1').style.border = "4px dashed #3498db";
-            document.getElementById('wordBox1').style.background = "#ffffff";
-            document.getElementById('wordBox2').style.border = "4px dashed #3498db";
-            document.getElementById('wordBox2').style.background = "#ffffff";
-
-            let shuffled = [...allWords].sort(() => 0.5 - Math.random());
-            let w1 = shuffled[0];
-            let w2 = shuffled[1];
-
-            document.getElementById('wordText1').innerText = w1.word;
-            document.getElementById('wordBox1').setAttribute('data-word', w1.word);
-            document.getElementById('wordText2').innerText = w2.word;
-            document.getElementById('wordBox2').setAttribute('data-word', w2.word);
-
-            currentTargetWord = Math.random() > 0.5 ? w1 : w2;
-
-            let player = document.getElementById('audioPlayer');
-            function playVoice() {
-                if(!isPaused && currentTargetWord.audioSrc) {
-                    player.src = currentTargetWord.audioSrc + "?t=" + Date.now();
-                    player.play().catch(e => console.log("ഓഡിയോ പ്ലേ പ്രശ്നം:", e));
-                }
-            }
-            playVoice();
-            audioIntervalId = setInterval(playVoice, 3800); 
-
-            document.getElementById('timerText').innerText = `ബാക്കി സമയം: ${timeLeft} സെക്കൻഡ്`;
-            timerId = setInterval(() => {
-                if(!isPaused) {
-                    timeLeft--;
-                    if(timeLeft <= 0) {
-                        clearInterval(timerId);
-                        revealAnswerAutomatically();
-                    } else {
-                        document.getElementById('timerText').innerText = `ബാക്കി സമയം: ${timeLeft} സെക്കൻഡ്`;
-                    }
-                }
-            }, 1000);
-        }
-
-        function togglePauseResume() {
-            let btn = document.getElementById('btnPauseResume');
-            let player = document.getElementById('audioPlayer');
-            if(!isPaused) {
-                isPaused = true;
-                btn.innerText = "▶️ Resume";
-                btn.className = "btn-green";
-                player.pause();
-            } else {
-                isPaused = false;
-                btn.innerText = "⏸️ Pause";
-                btn.className = "btn-orange";
-                player.play().catch(e => console.log(e));
-            }
-        }
-
-        function revealAnswerAutomatically() {
-            clearInterval(timerId);
-            clearInterval(audioIntervalId);
-            document.getElementById('audioPlayer').pause();
-
-            document.getElementById('mainTimerContainer').style.display = 'none';
-            document.getElementById('btnPauseResume').style.display = 'none';
-
-            let box1 = document.getElementById('wordBox1');
-            let box2 = document.getElementById('wordBox2');
+            let pt = currentPathPoints[ptIdx];
+            if(ptIdx === 0) dStr = `M ${pt.x} ${pt.y}`;
+            else dStr += ` L ${pt.x} ${pt.y}`;
             
-            if(box1.getAttribute('data-word') === currentTargetWord.word) {
-                box1.style.border = "5px solid #2ecc71";
-                box1.style.background = "#e8f8f5";
-            } else {
-                box2.style.border = "5px solid #2ecc71";
-                box2.style.background = "#e8f8f5";
-            }
-
-            let ansDiv = document.getElementById('bigAnswerText');
-            ansDiv.innerText = `ശരിയുത്തരം: ${currentTargetWord.word} ${currentTargetWord.malWord ? '('+currentTargetWord.malWord+')' : ''}`;
-            ansDiv.style.display = 'block';
-
-            if(currentTargetWord.path && currentTargetWord.path.length > 0) {
-                animationLoopCount = 0; 
-                document.getElementById('writingHand').style.display = 'block';
-                runHandwritingLoop();   
-            } else {
-                startSelfCheckCountdown();
-            }
-        }
-
-        function runHandwritingLoop() {
-            animationLoopCount++;
-            if (animationLoopCount <= 3) { 
-                document.getElementById('dictPlaybackEngine').innerHTML = "";
-                animateHandwriting(currentTargetWord.path, () => {
-                    setTimeout(runHandwritingLoop, 800);
-                });
-            } else {
-                document.getElementById('writingHand').style.display = 'none';
-                startSelfCheckCountdown();
-            }
-        }
-
-        // ✍️ ഹാൻഡ്‌റൈറ്റിംഗ് ബോക്സിന്റെ നടുവിലാക്കുന്ന (Auto Center & Scale) ഫംഗ്ഷൻ
-        function animateHandwriting(pathPoints, onCompleteCB) {
-            if(!pathPoints || pathPoints.length === 0) { if(onCompleteCB) onCompleteCB(); return; }
+            svgPathsArray.forEach(p => p.setAttribute("d", dStr));
             
-            let svg = document.getElementById('dictPlaybackEngine');
-            let hand = document.getElementById('writingHand');
-            let padArea = document.getElementById('padArea');
-            
-            let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            let paths = [];
+            /* 🖋️ നിങ്ങളുടെ ആവശ്യപ്രകാരം ഉള്ള പൊസിഷൻ ഓഫ്സെറ്റ് ക്രമീകരണം (x: 33, y: 50) */
+            penImg.setAttribute("x", pt.x - 33); 
+            penImg.setAttribute("y", pt.y - 50); 
 
-            // 🎛️ കോർഡിനേറ്റുകളുടെ മിനിമം, മാക്സിമം വാല്യൂസ് കണ്ട് പിടിച്ച് ഓട്ടോമാറ്റിക് സെന്റർ ചെയ്യുന്നു
-            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-            pathPoints.forEach(line => {
-                line.forEach(pt => {
-                    if(pt.x < minX) minX = pt.x;
-                    if(pt.x > maxX) maxX = pt.x;
-                    if(pt.y < minY) minY = pt.y;
-                    if(pt.y > maxY) maxY = pt.y;
-                });
-            });
-
-            let drawnWidth = maxX - minX;
-            let drawnHeight = maxY - minY;
-            if(drawnWidth <= 0) drawnWidth = 100;
-            if(drawnHeight <= 0) drawnHeight = 100;
-
-            // അഡ്മിൻ പാനലിലെ വരകളെ സ്റ്റുഡന്റ് പാനലിന്റെ ബോക്സിന്റെ കൃത്യം നടുവിലേക്ക് മാപ്പ് ചെയ്യുന്നു
-            let scaleX = 350 / drawnWidth;
-            let scaleY = 160 / drawnHeight;
-            let scale = Math.min(scaleX, scaleY, 0.35); // വലിപ്പം ഒരു പരിധിയിൽ കൂടാതെ കാക്കുന്നു
-
-            let offsetX = (1000 - (drawnWidth * scale)) / 2 - (minX * scale);
-            let offsetY = (1000 - (drawnHeight * scale)) / 2 - (minY * scale);
-
-            for(let i=0; i<8; i++) {
-                let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                p.setAttribute("transform", `translate(${(i-4)*0.2}, ${-(i-4)*0.2})`);
-                p.setAttribute("stroke", "#27ae60"); 
-                p.setAttribute("stroke-width", "9"); 
-                p.setAttribute("fill", "none");
-                p.setAttribute("stroke-linecap", "round");
-                
-                let startX = pathPoints[0][0].x * scale + offsetX;
-                let startY = pathPoints[0][0].y * scale + offsetY;
-                p.setAttribute("d", `M ${startX} ${startY}`);
-                g.appendChild(p);
-                paths.push(p);
-            }
-            svg.appendChild(g);
-
-            function moveHand(svgX, svgY) {
-                let rect = padArea.getBoundingClientRect();
-                let realX = (svgX / 1000) * rect.width;
-                let realY = (svgY / 1000) * rect.height;
-                // പേന പിടിച്ച കൈയുടെ അലൈൻമെന്റ്
-                hand.style.left = `${realX - 25}px`;
-                hand.style.top = `${realY - 55}px`;
-            }
-
-            let ptIdx = 0;
-            let lineIdx = 0;
-            let speed = 12; 
-
-            let initialX = pathPoints[0][0].x * scale + offsetX;
-            let initialY = pathPoints[0][0].y * scale + offsetY;
-            moveHand(initialX, initialY);
-
-            function drawStep() {
-                if (lineIdx >= pathPoints.length) {
-                    clearInterval(interval);
-                    if(onCompleteCB) onCompleteCB();
-                    return;
-                }
-
-                let currentLine = pathPoints[lineIdx];
-                let currPt = currentLine[ptIdx];
-
-                if (!currPt) {
-                    lineIdx++;
-                    ptIdx = 0;
-                    if (lineIdx < pathPoints.length && pathPoints[lineIdx][0]) {
-                        let nX = pathPoints[lineIdx][0].x * scale + offsetX;
-                        let nY = pathPoints[lineIdx][0].y * scale + offsetY;
-                        paths.forEach(p => {
-                            p.setAttribute("d", p.getAttribute("d") + ` M ${nX} ${nY}`);
-                        });
-                        moveHand(nX, nY);
-                    }
-                    return;
-                }
-
-                let finalX = currPt.x * scale + offsetX;
-                let finalY = currPt.y * scale + offsetY;
-
-                let dString = ` L ${finalX} ${finalY}`;
-                paths.forEach(p => p.setAttribute("d", p.getAttribute("d") + dString));
-                
-                moveHand(finalX, finalY);
-                ptIdx++;
-            }
-
-            let interval = setInterval(drawStep, speed);
+            ptIdx++;
+            requestAnimationFrame(tracePoints);
         }
+        tracePoints();
+    }
+    drawNextPath();
+}
+</script>
 
-        function startSelfCheckCountdown() {
-            let tickTimeLeft = 5;
-            let tickUi = document.getElementById('tickTimerText');
-            tickUi.innerText = `📝 നോട്ട്ബുക്കിൽ ടിക്ക് ഇടൂ... (${tickTimeLeft})`;
-            tickUi.style.display = 'block';
-            document.getElementById('btnForceSkip').style.display = 'block';
-
-            selfCheckTimerId = setInterval(() => {
-                tickTimeLeft--;
-                if(tickTimeLeft <= 0) {
-                    clearInterval(selfCheckTimerId);
-                    startNewRound(); 
-                } else {
-                    tickUi.innerText = `📝 നോട്ട്ബുക്കിൽ ടിക്ക് ഇടൂ... (${tickTimeLeft})`;
-                }
-            }, 1000);
-        }
-    </script>
 </body>
 </html>
