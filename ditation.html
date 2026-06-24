@@ -13,9 +13,13 @@
         h1 { font-size: 36px; color: #3498db; margin: 0 0 5px 0; text-align: center; }
         p.subtitle { font-size: 18px; color: #bdc3c7; margin: 0 0 25px 0; text-align: center; }
 
+        /* ക്ലിക്ക് ചെയ്യാനുള്ള നിർദ്ദേശം കാണിക്കുന്ന ബോക്സ് */
+        #startOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(26, 37, 47, 0.95); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; }
+        .start-btn { background: #2ecc71; color: white; font-size: 28px; padding: 20px 40px; border-radius: 50px; border: none; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+
         .workspace { display: flex; align-items: center; justify-content: center; gap: 30px; width: 100%; max-width: 1250px; margin-bottom: 25px; flex-wrap: wrap; }
         
-        /* 📜 കുട്ടികൾക്ക് നോക്കാനുള്ള ഫോർ ലൈൻ ഡിസ്‌പ്ലേ ബോക്സുകൾ */
+        /* 📜 വാക്കുകൾ കാണിക്കുന്ന ഫോർ ലൈൻ ഡിസ്‌പ്ലേ ബോക്സുകൾ */
         .word-four-line { 
             position: relative;
             width: 320px; 
@@ -39,13 +43,19 @@
             transition: 0.3s;
         }
 
+        /* അറബിക് അക്ഷരങ്ങൾ വരകൾക്ക് മുകളിൽ കറക്റ്റ് ആയി വരാൻ */
         .word-text {
-            font-size: 45px; 
+            font-size: 48px; 
             font-weight: bold; 
             color: #2c3e50; 
-            font-family: 'Traditional Arabic', 'Amiri', sans-serif;
-            line-height: 1;
-            margin-top: -10px;
+            font-family: 'Traditional Arabic', 'Amiri', Arial, sans-serif;
+            text-align: center;
+            direction: rtl;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -62%); /* മുകളിലെ നീല വരയ്ക്ക് കറക്റ്റ് മുകളിലാക്കാൻ */
+            width: 100%;
             z-index: 5;
         }
         
@@ -72,7 +82,6 @@
             pointer-events: none;
             z-index: 20;
             display: none;
-            transition: transform 0.05s linear;
         }
 
         /* ടൈമറും കൺട്രോളുകളും */
@@ -99,8 +108,13 @@
 </head>
 <body>
 
+    <div id="startOverlay" onclick="initApp()">
+        <div class="start-btn">▶️ ക്ലാസ്സ് ആരംഭിക്കുക</div>
+        <p style="color: #bdc3c7; margin-top: 15px; font-size: 16px;">(ഓഡിയോ കൃത്യമായി കേൾക്കാൻ ഇവിടെ ക്ലിക്ക് ചെയ്യുക)</p>
+    </div>
+
     <div class="container">
-        <div id="loadingText" class="loading">🔄 അഡ്മിൻ പാനലിൽ നിന്നുള്ള ഡാറ്റയും ഓഡിയോയും ലോഡ് ചെയ്യുന്നു...</div>
+        <div id="loadingText" class="loading" style="display:none;">🔄 അഡ്മിൻ പാനലിൽ നിന്നുള്ള ഡാറ്റയും ഓഡിയോയും ലോഡ് ചെയ്യുന്നു...</div>
 
         <div id="mainContent" style="display:none; width: 100%; flex-direction: column; align-items: center;">
             <h1>🎓 ഡിജിറ്റൽ കേട്ടെഴുത്ത് പാനൽ</h1>
@@ -150,11 +164,12 @@
         let isPaused = false;
         let animationLoopCount = 0; 
 
-        window.onload = function() {
+        function initApp() {
+            document.getElementById('startOverlay').style.display = 'none';
+            document.getElementById('loadingText').style.display = 'block';
             loadWordAppData();
-        };
+        }
 
-        // 📁 അഡ്മിൻ പാനലിന്റെ ഡാറ്റാ ഘടന അനുസരിച്ച് ലോഡ് ചെയ്യുന്നു
         async function loadWordAppData() {
             try {
                 let r = await fetch(`./data/data.json?t=${Date.now()}`);
@@ -171,16 +186,15 @@
 
         function extractLatestWords() {
             allWords = [];
-            // അഡ്മിൻ പാനലിലെ "words" അറേ അല്ലെങ്കിൽ നേരിട്ടുള്ള ഒബ്ജക്റ്റ് ഫോർമാറ്റ് സപ്പോർട്ട് ചെയ്യുന്നു
             let source = wordAppData.words || wordAppData;
 
             if(Array.isArray(source)) {
                 source.forEach(item => {
                     allWords.push({
-                        word: item.arbiText || item.word || "", // അഡ്മിനിലെ ടെക്സ്റ്റ് (arbiText) എടുക്കുന്നു
+                        word: item.arbiText || item.word || "", 
                         malWord: item.mal || "",               
-                        audioSrc: item.audio ? `data/${item.audio}` : "", // അഡ്മിൻ അപ്‌ലോഡ് ചെയ്ത ഓഡിയോ
-                        path: item.writingPaths || null         // അഡ്മിൻ വരച്ച ഹാൻഡ് റൈറ്റിംഗ് പാത്ത്
+                        audioSrc: item.audio ? `data/${item.audio}` : "", 
+                        path: item.writingPaths || null         
                     });
                 });
             }
@@ -233,12 +247,11 @@
 
             currentTargetWord = Math.random() > 0.5 ? w1 : w2;
 
-            // 🔊 അഡ്മിൻ റെക്കോർഡ് ചെയ്ത ഓഡിയോ 30 സെക്കൻഡ് പ്ലേ ചെയ്യുന്ന ഭാഗം
             let player = document.getElementById('audioPlayer');
             function playVoice() {
                 if(!isPaused && currentTargetWord.audioSrc) {
                     player.src = currentTargetWord.audioSrc + "?t=" + Date.now();
-                    player.play().catch(e => console.log("ഓഡിയോ പ്രശ്നം:", e));
+                    player.play().catch(e => console.log("ഓഡിയോ പ്ലേ പ്രശ്നം:", e));
                 }
             }
             playVoice();
@@ -297,7 +310,6 @@
             ansDiv.innerText = `ശരിയുത്തരം: ${currentTargetWord.word} ${currentTargetWord.malWord ? '('+currentTargetWord.malWord+')' : ''}`;
             ansDiv.style.display = 'block';
 
-            // അഡ്മിൻ പാനലിലെ writingPaths ക്യാപ്‌ചർ ചെയ്ത് റൺ ചെയ്യുന്നു
             if(currentTargetWord.path && currentTargetWord.path.length > 0) {
                 animationLoopCount = 0; 
                 document.getElementById('writingHand').style.display = 'block';
@@ -320,7 +332,7 @@
             }
         }
 
-        // 🖐️ അഡ്മിൻ പാനലിലെ കോർഡിനേറ്റ്സ് അനുസരിച്ച് കൈ ചലിപ്പിച്ചു വരയ്ക്കുന്നു
+        // ✍️ ഹാൻഡ്‌റൈറ്റിംഗ് ബോക്സിന്റെ നടുവിലാക്കുന്ന (Auto Center & Scale) ഫംഗ്ഷൻ
         function animateHandwriting(pathPoints, onCompleteCB) {
             if(!pathPoints || pathPoints.length === 0) { if(onCompleteCB) onCompleteCB(); return; }
             
@@ -330,23 +342,41 @@
             
             let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
             let paths = [];
-            
-            // അഡ്മിന്റെ Canvas-ൽ നിന്നും സ്റ്റുഡന്റ് പാനലിന്റെ ബോക്സിലേക്ക് അളവുകൾ ക്രമീകരിക്കുന്നു
-            let scaleX = 0.38;
-            let scaleY = 0.18;
-            let offsetX = 40;
-            let offsetY = 30;
+
+            // 🎛️ കോർഡിനേറ്റുകളുടെ മിനിമം, മാക്സിമം വാല്യൂസ് കണ്ട് പിടിച്ച് ഓട്ടോമാറ്റിക് സെന്റർ ചെയ്യുന്നു
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            pathPoints.forEach(line => {
+                line.forEach(pt => {
+                    if(pt.x < minX) minX = pt.x;
+                    if(pt.x > maxX) maxX = pt.x;
+                    if(pt.y < minY) minY = pt.y;
+                    if(pt.y > maxY) maxY = pt.y;
+                });
+            });
+
+            let drawnWidth = maxX - minX;
+            let drawnHeight = maxY - minY;
+            if(drawnWidth <= 0) drawnWidth = 100;
+            if(drawnHeight <= 0) drawnHeight = 100;
+
+            // അഡ്മിൻ പാനലിലെ വരകളെ സ്റ്റുഡന്റ് പാനലിന്റെ ബോക്സിന്റെ കൃത്യം നടുവിലേക്ക് മാപ്പ് ചെയ്യുന്നു
+            let scaleX = 350 / drawnWidth;
+            let scaleY = 160 / drawnHeight;
+            let scale = Math.min(scaleX, scaleY, 0.35); // വലിപ്പം ഒരു പരിധിയിൽ കൂടാതെ കാക്കുന്നു
+
+            let offsetX = (1000 - (drawnWidth * scale)) / 2 - (minX * scale);
+            let offsetY = (1000 - (drawnHeight * scale)) / 2 - (minY * scale);
 
             for(let i=0; i<8; i++) {
                 let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 p.setAttribute("transform", `translate(${(i-4)*0.2}, ${-(i-4)*0.2})`);
                 p.setAttribute("stroke", "#27ae60"); 
-                p.setAttribute("stroke-width", "8"); 
+                p.setAttribute("stroke-width", "9"); 
                 p.setAttribute("fill", "none");
                 p.setAttribute("stroke-linecap", "round");
                 
-                let startX = pathPoints[0][0].x * scaleX + offsetX;
-                let startY = pathPoints[0][0].y * scaleY + offsetY;
+                let startX = pathPoints[0][0].x * scale + offsetX;
+                let startY = pathPoints[0][0].y * scale + offsetY;
                 p.setAttribute("d", `M ${startX} ${startY}`);
                 g.appendChild(p);
                 paths.push(p);
@@ -357,6 +387,7 @@
                 let rect = padArea.getBoundingClientRect();
                 let realX = (svgX / 1000) * rect.width;
                 let realY = (svgY / 1000) * rect.height;
+                // പേന പിടിച്ച കൈയുടെ അലൈൻമെന്റ്
                 hand.style.left = `${realX - 25}px`;
                 hand.style.top = `${realY - 55}px`;
             }
@@ -365,8 +396,8 @@
             let lineIdx = 0;
             let speed = 12; 
 
-            let initialX = pathPoints[0][0].x * scaleX + offsetX;
-            let initialY = pathPoints[0][0].y * scaleY + offsetY;
+            let initialX = pathPoints[0][0].x * scale + offsetX;
+            let initialY = pathPoints[0][0].y * scale + offsetY;
             moveHand(initialX, initialY);
 
             function drawStep() {
@@ -383,8 +414,8 @@
                     lineIdx++;
                     ptIdx = 0;
                     if (lineIdx < pathPoints.length && pathPoints[lineIdx][0]) {
-                        let nX = pathPoints[lineIdx][0].x * scaleX + offsetX;
-                        let nY = pathPoints[lineIdx][0].y * scaleY + offsetY;
+                        let nX = pathPoints[lineIdx][0].x * scale + offsetX;
+                        let nY = pathPoints[lineIdx][0].y * scale + offsetY;
                         paths.forEach(p => {
                             p.setAttribute("d", p.getAttribute("d") + ` M ${nX} ${nY}`);
                         });
@@ -393,8 +424,8 @@
                     return;
                 }
 
-                let finalX = currPt.x * scaleX + offsetX;
-                let finalY = currPt.y * scaleY + offsetY;
+                let finalX = currPt.x * scale + offsetX;
+                let finalY = currPt.y * scale + offsetY;
 
                 let dString = ` L ${finalX} ${finalY}`;
                 paths.forEach(p => p.setAttribute("d", p.getAttribute("d") + dString));
