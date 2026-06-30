@@ -141,7 +141,6 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
 .alignment-controller input, .alignment-controller select { width: 100%; margin: 2px 0; }
 .alignment-controller select { background: #34495e; color: white; border: 1px solid #7f8c8d; padding: 3px; border-radius: 4px;}
 
-/* ⏸️ പോസ് ബട്ടന്റെ സ്റ്റൈൽ */
 .btn-pause {
     background: #e67e22;
     color: white;
@@ -256,13 +255,14 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
 </div>
 
 <script>
-let last30Words = [];
+let allWordsList = []; 
+let currentQuestionIndex = 0; 
 let leftWord = null;
 let rightWord = null;
 let targetWord = null;
 let currentAudio = null;
 let timerInterval = null;
-let maxDuration = 60; // 🛠️ സമയം 30-ൽ നിന്നും 60 സെക്കൻഡ് ആക്കി മാറ്റി
+let maxDuration = 60; 
 let timeLeft = 60;   
 let isPaused = false; 
 let audioContextUnlocked = false; 
@@ -357,9 +357,11 @@ async function loadDataFromJSON() {
             updateStudentDropdown();
         }
         
-        // 🛠️ അഡ്മിൻ പാനലിൽ ഏറ്റവും അവസാനം അപ്‌ലോഡ് ചെയ്യുന്ന 30 വാക്കുകൾ മാത്രം എടുക്കുന്നു
         if(rawData.words && Array.isArray(rawData.words)) {
-            last30Words = rawData.words.slice(-30);
+            let totalWords = rawData.words;
+            allWordsList = totalWords.length > 30 ? totalWords.slice(-30) : totalWords;
+            currentQuestionIndex = 0; 
+            console.log("ഗെയിമിനായി ലോഡ് ചെയ്ത ആകെ വാക്കുകൾ:", allWordsList.length);
         }
     } catch (e) {
         alert("ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല!");
@@ -396,7 +398,7 @@ function startGame() {
     unlockAudio(); 
     let student = document.getElementById('studentSelect').value;
     if(!student) return alert("പേര് തിരഞ്ഞെടുക്കുക!");
-    if(last30Words.length < 2) return alert("മിനിമം 2 വാക്കുകൾ വേണം!");
+    if(allWordsList.length < 1) return alert("വാക്കുകൾ ലഭ്യമല്ല!");
     
     document.getElementById('studentHeading').innerText = `👤 കുട്ടി: ${student}`;
     document.getElementById('startOverlay').style.display = 'none';
@@ -407,7 +409,7 @@ function startGame() {
 }
 
 function generateQuestion() {
-    if(last30Words.length < 2) {
+    if(currentQuestionIndex >= allWordsList.length) {
         if(currentAudio) currentAudio.pause();
         clearInterval(timerInterval);
         document.getElementById('liveTool').style.display = 'none';
@@ -430,11 +432,18 @@ function generateQuestion() {
     document.getElementById('writingSection').style.display = 'none';
     document.getElementById('svgWritingBoard').innerHTML = '';
 
-    let shuffled = [...last30Words].sort(() => 0.5 - Math.random());
-    leftWord = shuffled[0];
-    rightWord = shuffled[1];
-    
-    targetWord = Math.random() > 0.5 ? leftWord : rightWord;
+    targetWord = allWordsList[currentQuestionIndex];
+
+    let alternativeWords = allWordsList.filter(w => w.arbiText !== targetWord.arbiText);
+    let randomAlternative = alternativeWords.length > 0 ? alternativeWords[Math.floor(Math.random() * alternativeWords.length)] : targetWord;
+
+    if(Math.random() > 0.5) {
+        leftWord = targetWord;
+        rightWord = randomAlternative;
+    } else {
+        leftWord = randomAlternative;
+        rightWord = targetWord;
+    }
 
     document.getElementById('textLeft').innerText = leftWord.arbiText || '';
     document.getElementById('textRight').innerText = rightWord.arbiText || '';
@@ -442,7 +451,7 @@ function generateQuestion() {
     adjustText(); 
     playTargetAudioLoop();
     
-    timeLeft = maxDuration; // ടൈമർ 60 സെക്കന്റിൽ നിന്ന് തുടങ്ങുന്നു
+    timeLeft = maxDuration; 
     startTimer();
 }
 
@@ -488,19 +497,18 @@ function startTimer() {
     }, 100);
 }
 
-/* ⏸️ പോസ് ചെയ്യാനും വീണ്ടും പ്ലേ ചെയ്യാനുമുള്ള പുതിയ ഫങ്ഷൻ */
 function togglePause() {
     let pBtn = document.getElementById('pauseBtn');
     if(!currentAudio) return;
 
     if(!isPaused) {
         isPaused = true;
-        currentAudio.pause(); // ഓഡിയോ നിർത്തുന്നു
+        currentAudio.pause(); 
         pBtn.innerHTML = '<i class="fa-solid fa-play"></i> Play';
         pBtn.classList.add('paused');
     } else {
         isPaused = false;
-        currentAudio.play(); // ഓഡിയോ വീണ്ടും തുടങ്ങുന്നു
+        currentAudio.play(); 
         pBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
         pBtn.classList.remove('paused');
     }
@@ -516,7 +524,7 @@ function handleTimeoutAndReveal() {
     document.getElementById('tick' + correctSide).style.display = 'block';
     document.getElementById('writingSection').style.display = 'block';
 
-    last30Words = last30Words.filter(word => word !== targetWord);
+    currentQuestionIndex++;
 
     if(targetWord.writingPaths && targetWord.writingPaths.length > 0) {
         animateHandwritingWithPen('svgWritingBoard', targetWord.writingPaths);
@@ -539,7 +547,7 @@ function animateHandwritingWithPen(svgId, pathsData) {
     let pIdx = 0;
     
     function drawNextPath() {
-        if(isPaused) { // പെൻ അനിമേഷൻ നടക്കുമ്പോൾ പോസ് ചെയ്താൽ കാത്തുനിൽക്കാൻ
+        if(isPaused) {
             setTimeout(drawNextPath, 100);
             return;
         }
