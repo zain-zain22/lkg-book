@@ -3,20 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>വേർഡ് ആപ്പ് - മൾട്ടി സ്ക്രീൻ റൂം</title>
+<title>വേർഡ് ആപ്പ് - പ്രോ ലൈവ് റൂം</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root {
-    /* 🛠️ ഡിഫോൾട്ട് അക്ഷരങ്ങളുടെ വലുപ്പവും ലൈൻ അലൈൻമെന്റും */
-    --arabic-font-size: 50px;   
+    /* 🛠️ നിങ്ങൾ ആവശ്യപ്പെട്ട പുതിയ ഡിഫോൾട്ട് അളവുകൾ ഇവിടെ സെറ്റ് ചെയ്തിട്ടുണ്ട് */
+    --arabic-font-size: 65px;   
     --box-left-move: 0px;       
-    --box-top-move: 0px;        
+    --box-top-move: 2px;        
 }
 
 * { box-sizing: border-box; }
 body { font-family: 'Segoe UI', sans-serif; background: #eef2f3; margin: 0; padding: 10px; text-align: center; user-select: none; height: 100vh; overflow: hidden; }
 
-/* 💻 ലാപ്ടോപ്പിലും മൊബൈലിലും സ്ക്രോൾ വരാത്ത മെയിൻ കണ്ടെയ്നർ */
 .container { 
     max-width: 98%; 
     margin: 0 auto; 
@@ -46,7 +45,7 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
 
 .four-line-box {
     flex: 1;
-    height: 160px; /* ലാപ്ടോപ്പ് ഡിഫോൾട്ട് ഹൈറ്റ് */
+    height: 160px; 
     background: #fff;
     border: 2px solid #cbd5e1;
     border-radius: 8px;
@@ -77,7 +76,7 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
 }
 .full-width-board {
     width: 100%;
-    height: 160px; /* ലാപ്ടോപ്പ് ഡിഫോൾട്ട് ഹൈറ്റ് */
+    height: 160px; 
     background: #fff;
     border: 2px solid #e67e22;
     border-radius: 8px;
@@ -95,9 +94,10 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
     pointer-events: none;
 }
 
+/* 🌟 ഇവിടെ ഫോണ്ടിൽ 'Arabic Typesetting' പ്രധാനമായി ഉൾപ്പെടുത്തിയിരിക്കുന്നു */
 .arbi-text {
     font-size: var(--arabic-font-size);
-    font-family: 'Traditional Arabic', 'Amiri', sans-serif;
+    font-family: 'Arabic Typesetting', 'Traditional Arabic', 'Amiri', sans-serif;
     color: #2c3e50;
     direction: rtl;
     width: 100%;
@@ -116,33 +116,42 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
 .timer-container { width: 100%; background: #ddd; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
 .timer-bar { height: 100%; background: #e74c3c; width: 100%; transition: width 0.1s linear; }
 
-/* 🛠️ അലൈൻമെന്റ് ടൂൾ സ്റ്റൈൽ */
+/* 🛠️ ഡ്രാഗ് ചെയ്യാൻ പറ്റുന്ന പുതിയ അലൈൻമെന്റ് ടൂൾ സ്റ്റൈൽ */
 .alignment-controller {
     position: fixed;
-    top: 10px;
-    right: 10px;
+    top: 15px;
+    right: 15px;
     background: rgba(44, 62, 80, 0.95);
     color: white;
     padding: 10px;
     border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     z-index: 10000;
-    width: 160px;
+    width: 170px;
     text-align: left;
     font-size: 11px;
 }
-.alignment-controller h4 { margin: 0 0 5px 0; color: #2ecc71; font-size: 12px; text-align: center; border-bottom: 1px solid #7f8c8d; padding-bottom: 2px;}
+/* ഡ്രാഗ് ചെയ്യാൻ പിടിക്കുന്ന ഹെഡർ ഭാഗം */
+.drag-header {
+    padding: 3px;
+    cursor: move;
+    background-color: #2980b9;
+    color: white;
+    font-weight: bold;
+    text-align: center;
+    border-radius: 4px;
+    margin-bottom: 6px;
+    font-size: 12px;
+}
 .alignment-controller label { color: #bdc3c7; margin-top: 4px; font-size: 10px; display: flex; justify-content: space-between;}
 .alignment-controller input { width: 100%; margin: 2px 0; }
 
-/* 📱 📱 📱 മൊബൈൽ ലാൻഡ്‌കേപ്പ് മോഡിനായുള്ള പ്രത്യേക റെസ്പോൺസീവ് സെറ്റിംഗ്സ് 📱 📱 📱 */
 @media screen and (max-height: 500px) and (orientation: landscape) {
     body { padding: 4px; }
     .container { height: 97vh; padding: 6px; }
     h2 { font-size: 16px; }
     .header-area h3 { font-size: 13px; margin: 0; }
     
-    /* ഉയരം കുറഞ്ഞ മൊബൈൽ സ്ക്രീനിൽ ബോക്സുകളുടെ ഉയരം കുറക്കുന്നു (സ്ക്രോളിംഗ് ഒഴിവാക്കാൻ) */
     .four-line-box { 
         height: 105px; 
         background-size: 100% 105px;
@@ -151,24 +160,26 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
     .full-width-board { height: 105px; }
     .writing-board-section { margin-top: 2px; padding-top: 2px; }
     .writing-title { font-size: 12px; margin-bottom: 1px; }
-    
-    /* ടൂൾ ബോക്സ് മൊബൈലിൽ ഒതുങ്ങി നിൽക്കാൻ */
-    .alignment-controller { width: 130px; padding: 6px; top: 5px; right: 5px; font-size: 10px; }
-    .alignment-controller h4 { font-size: 11px; margin-bottom: 3px; }
 }
 
 .overlay-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; padding: 20px; }
+
+/* 🔄 റീസ്റ്റാർട്ട് ബട്ടണിനുള്ള സ്റ്റൈൽ */
+.btn-restart { background: #3498db; color: white; border: none; padding: 12px 25px; font-size: 16px; border-radius: 5px; cursor: pointer; margin-top: 15px; box-shadow: 0 4px 0 #2980b9; }
+.btn-restart:active { transform: translateY(4px); box-shadow: none; }
+.btn-green { background: #2ecc71; color: white; border: none; padding: 10px 20px; font-size: 15px; border-radius: 5px; cursor: pointer; margin-top: 10px; width: 100%; }
 </style>
 </head>
 <body>
 
 <div class="alignment-controller" id="liveTool" style="display:none;">
-    <h4><i class="fa-solid fa-sliders"></i> ടൂൾ ബോക്സ്</h4>
-    <label>വലിപ്പം: <span id="valSize">50px</span></label>
-    <input type="range" id="sliderSize" min="20" max="90" value="50" oninput="adjustText()">
+    <div class="drag-header" id="dragHandle"><i class="fa-solid fa-arrows-to-dot"></i> ഇവിടെ പിടിച്ചു നീക്കുക</div>
     
-    <label>ഉയരം: <span id="valTop">0px</span></label>
-    <input type="range" id="sliderTop" min="-40" max="40" value="0" oninput="adjustText()">
+    <label>വലിപ്പം: <span id="valSize">65px</span></label>
+    <input type="range" id="sliderSize" min="20" max="100" value="65" oninput="adjustText()">
+    
+    <label>ഉയരം: <span id="valTop">2px</span></label>
+    <input type="range" id="sliderTop" min="-40" max="40" value="2" oninput="adjustText()">
     
     <label>ഇടത്/വലത്: <span id="valLeft">0px</span></label>
     <input type="range" id="sliderLeft" min="-80" max="80" value="0" oninput="adjustText()">
@@ -213,7 +224,7 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
     <div class="writing-board-section" id="writingSection" style="display:none;">
         <div class="writing-title"><i class="fa-solid fa-pen-fancy"></i> എഴുതുന്ന രൂപം ശ്രദ്ധിക്കുക:</div>
         <div class="full-width-board">
-            <svg class="hw-canvas-svg" id="svgWritingBoard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="none"></svg>
+            <svg class="hw-canvas-svg" id="svgWritingBoard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet"></svg>
         </div>
     </div>
 </div>
@@ -226,16 +237,11 @@ let targetWord = null;
 let currentAudio = null;
 let timerInterval = null;
 let maxDuration = 30;
+let audioContextUnlocked = false; 
 
 window.onload = function() {
     loadDataFromJSON();
-    detectDevice();
-}
-
-function detectDevice() {
-    if(window.innerHeight < 500) {
-        document.getElementById('modeIndicator').innerText = "Mobile Landscape";
-    }
+    makeElementDraggable(document.getElementById("liveTool"));
 }
 
 function adjustText() {
@@ -252,6 +258,56 @@ function adjustText() {
         txt.style.fontSize = size + 'px';
         txt.style.transform = `translate(${left}px, ${top}px)`;
     });
+}
+
+function makeElementDraggable(elmnt) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    const handle = document.getElementById("dragHandle");
+    
+    if (handle) {
+        handle.onmousedown = dragMouseDown;
+        handle.ontouchstart = dragMouseDown;
+    } else {
+        elmnt.onmousedown = dragMouseDown;
+        elmnt.ontouchstart = dragMouseDown;
+    }
+
+    function dragMouseDown(e) {
+        e = e || window.event;
+        let clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+        let clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
+        
+        pos3 = clientX;
+        pos4 = clientY;
+        
+        document.onmouseup = closeDragElement;
+        document.onmousemove = elementDrag;
+        
+        document.ontouchend = closeDragElement;
+        document.ontouchmove = elementDrag;
+    }
+
+    function elementDrag(e) {
+        e = e || window.event;
+        let clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
+        let clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
+        
+        pos1 = pos3 - clientX;
+        pos2 = pos4 - clientY;
+        pos3 = clientX;
+        pos4 = clientY;
+        
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        elmnt.style.right = "auto"; 
+    }
+
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+        document.ontouchend = null;
+        document.ontouchmove = null;
+    }
 }
 
 async function loadDataFromJSON() {
@@ -295,7 +351,18 @@ function updateStudentDropdown() {
     }
 }
 
+function unlockAudio() {
+    if (!audioContextUnlocked) {
+        let context = new (window.AudioContext || window.webkitAudioContext)();
+        if (context.state === 'suspended') {
+            context.resume();
+        }
+        audioContextUnlocked = true;
+    }
+}
+
 function startGame() {
+    unlockAudio(); 
     let student = document.getElementById('studentSelect').value;
     if(!student) return alert("പേര് തിരഞ്ഞെടുക്കുക!");
     if(last30Words.length < 2) return alert("മിനിമം 2 വാക്കുകൾ വേണം!");
@@ -313,7 +380,12 @@ function generateQuestion() {
         if(currentAudio) currentAudio.pause();
         clearInterval(timerInterval);
         document.getElementById('liveTool').style.display = 'none';
-        document.getElementById('gameContent').innerHTML = "<h2 style='color:#2ecc71; margin-top:20vh; font-size:30px;'>🎉 എല്ലാ വാക്കുകളും കഴിഞ്ഞു! 🎉</h2>";
+        document.getElementById('gameContent').innerHTML = `
+            <div style="margin-top: 18vh;">
+                <h2 style="color:#2ecc71; font-size:30px; margin-bottom:15px;">🎉 എല്ലാ വാക്കുകളും കഴിഞ്ഞു! 🎉</h2>
+                <button class="btn-restart" onclick="location.reload();"><i class="fa-solid fa-rotate-right"></i> വീണ്ടും കളിക്കുക</button>
+            </div>
+        `;
         return;
     }
 
@@ -331,7 +403,7 @@ function generateQuestion() {
     document.getElementById('textLeft').innerText = leftWord.arbiText || '';
     document.getElementById('textRight').innerText = rightWord.arbiText || '';
 
-    adjustText();
+    adjustText(); 
     playTargetAudioLoop();
     startTimer();
 }
@@ -347,7 +419,17 @@ function playTargetAudioLoop() {
     
     currentAudio = new Audio(audioPath + '?t=' + Date.now());
     currentAudio.loop = true; 
-    currentAudio.play().catch(e => console.log("Audio Error", e));
+    
+    let playPromise = currentAudio.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            console.log("ക്രോം ഓഡിയോ തടഞ്ഞു, സ്ക്രീൻ ക്ലിക്കിനായി കാക്കുന്നു...", error);
+            document.addEventListener('click', function unlockAndPlay() {
+                currentAudio.play();
+                document.removeEventListener('click', unlockAndPlay);
+            }, { once: true });
+        });
+    }
 }
 
 function startTimer() {
@@ -392,8 +474,8 @@ function animateHandwritingWithPen(svgId, pathsData) {
     
     let penImg = document.createElementNS("http://www.w3.org/2000/svg", "image");
     penImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png"); 
-    penImg.setAttribute("width", "70");
-    penImg.setAttribute("height", "70");
+    penImg.setAttribute("width", "150");
+    penImg.setAttribute("height", "150");
     penImg.setAttribute("style", "position: absolute; z-index: 100; pointer-events: none; transition: transform 0.05s linear;");
     penImg.style.display = "none";
     
@@ -418,7 +500,7 @@ function animateHandwritingWithPen(svgId, pathsData) {
             let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
             p.setAttribute("transform", `translate(${(i-8)*0.4}, ${-(i-8)})`);
             p.setAttribute("stroke", "#e74c3c"); 
-            p.setAttribute("stroke-width", "2.8");
+            p.setAttribute("stroke-width", "3");
             p.setAttribute("fill", "none");
             p.setAttribute("stroke-linecap", "round");
             g.appendChild(p);
@@ -444,8 +526,8 @@ function animateHandwritingWithPen(svgId, pathsData) {
             
             svgPathsArray.forEach(p => p.setAttribute("d", dStr));
             
-            penImg.setAttribute("x", pt.x - 10); 
-            penImg.setAttribute("y", pt.y - 65); 
+            penImg.setAttribute("x", pt.x - 33); 
+            penImg.setAttribute("y", pt.y - 50); 
 
             ptIdx++;
             requestAnimationFrame(tracePoints);
@@ -455,7 +537,5 @@ function animateHandwritingWithPen(svgId, pathsData) {
     drawNextPath();
 }
 </script>
-
 </body>
 </html>
-
