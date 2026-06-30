@@ -141,6 +141,25 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
 .alignment-controller input, .alignment-controller select { width: 100%; margin: 2px 0; }
 .alignment-controller select { background: #34495e; color: white; border: 1px solid #7f8c8d; padding: 3px; border-radius: 4px;}
 
+/* ⏸️ പോസ് ബട്ടന്റെ സ്റ്റൈൽ */
+.btn-pause {
+    background: #e67e22;
+    color: white;
+    border: none;
+    padding: 5px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+.btn-pause.paused { background: #2ecc71; }
+
 @media screen and (max-height: 500px) and (orientation: landscape) {
     body { padding: 4px; }
     .container { height: 97vh; padding: 6px; }
@@ -188,6 +207,8 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
     
     <label>ഇടത്/വലത്: <span id="valLeft">0px</span></label>
     <input type="range" id="sliderLeft" min="-80" max="80" value="0" oninput="adjustText()">
+
+    <button id="pauseBtn" class="btn-pause" onclick="togglePause()"><i class="fa-solid fa-pause"></i> Pause</button>
 </div>
 
 <div id="startOverlay" class="overlay-screen">
@@ -241,7 +262,9 @@ let rightWord = null;
 let targetWord = null;
 let currentAudio = null;
 let timerInterval = null;
-let maxDuration = 30;
+let maxDuration = 60; // 🛠️ സമയം 30-ൽ നിന്നും 60 സെക്കൻഡ് ആക്കി മാറ്റി
+let timeLeft = 60;   
+let isPaused = false; 
 let audioContextUnlocked = false; 
 
 window.onload = function() {
@@ -334,6 +357,7 @@ async function loadDataFromJSON() {
             updateStudentDropdown();
         }
         
+        // 🛠️ അഡ്മിൻ പാനലിൽ ഏറ്റവും അവസാനം അപ്‌ലോഡ് ചെയ്യുന്ന 30 വാക്കുകൾ മാത്രം എടുക്കുന്നു
         if(rawData.words && Array.isArray(rawData.words)) {
             last30Words = rawData.words.slice(-30);
         }
@@ -396,6 +420,11 @@ function generateQuestion() {
         return;
     }
 
+    isPaused = false;
+    let pBtn = document.getElementById('pauseBtn');
+    pBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+    pBtn.classList.remove('paused');
+
     document.getElementById('tickLeft').style.display = 'none';
     document.getElementById('tickRight').style.display = 'none';
     document.getElementById('writingSection').style.display = 'none';
@@ -412,6 +441,8 @@ function generateQuestion() {
 
     adjustText(); 
     playTargetAudioLoop();
+    
+    timeLeft = maxDuration; // ടൈമർ 60 സെക്കന്റിൽ നിന്ന് തുടങ്ങുന്നു
     startTimer();
 }
 
@@ -432,7 +463,7 @@ function playTargetAudioLoop() {
         playPromise.catch(error => {
             console.log("ക്രോം ഓഡിയോ തടഞ്ഞു, സ്ക്രീൻ ക്ലിക്കിനായി കാക്കുന്നു...", error);
             document.addEventListener('click', function unlockAndPlay() {
-                currentAudio.play();
+                if(!isPaused) currentAudio.play();
                 document.removeEventListener('click', unlockAndPlay);
             }, { once: true });
         });
@@ -441,19 +472,38 @@ function playTargetAudioLoop() {
 
 function startTimer() {
     clearInterval(timerInterval);
-    let timeLeft = maxDuration;
     let bar = document.getElementById('timerBar');
     
     timerInterval = setInterval(() => {
-        timeLeft -= 0.1;
-        let percentage = (timeLeft / maxDuration) * 100;
-        bar.style.width = percentage + '%';
-        
-        if(timeLeft <= 0) {
-            clearInterval(timerInterval);
-            handleTimeoutAndReveal();
+        if(!isPaused) {
+            timeLeft -= 0.1;
+            let percentage = (timeLeft / maxDuration) * 100;
+            bar.style.width = percentage + '%';
+            
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                handleTimeoutAndReveal();
+            }
         }
     }, 100);
+}
+
+/* ⏸️ പോസ് ചെയ്യാനും വീണ്ടും പ്ലേ ചെയ്യാനുമുള്ള പുതിയ ഫങ്ഷൻ */
+function togglePause() {
+    let pBtn = document.getElementById('pauseBtn');
+    if(!currentAudio) return;
+
+    if(!isPaused) {
+        isPaused = true;
+        currentAudio.pause(); // ഓഡിയോ നിർത്തുന്നു
+        pBtn.innerHTML = '<i class="fa-solid fa-play"></i> Play';
+        pBtn.classList.add('paused');
+    } else {
+        isPaused = false;
+        currentAudio.play(); // ഓഡിയോ വീണ്ടും തുടങ്ങുന്നു
+        pBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+        pBtn.classList.remove('paused');
+    }
 }
 
 function handleTimeoutAndReveal() {
@@ -489,6 +539,11 @@ function animateHandwritingWithPen(svgId, pathsData) {
     let pIdx = 0;
     
     function drawNextPath() {
+        if(isPaused) { // പെൻ അനിമേഷൻ നടക്കുമ്പോൾ പോസ് ചെയ്താൽ കാത്തുനിൽക്കാൻ
+            setTimeout(drawNextPath, 100);
+            return;
+        }
+
         if(pIdx >= pathsData.length) {
             penImg.style.display = "none";
             setTimeout(generateQuestion, 3000);
@@ -521,6 +576,11 @@ function animateHandwritingWithPen(svgId, pathsData) {
         let dStr = `M ${currentPathPoints[0].x} ${currentPathPoints[0].y}`;
         
         function tracePoints() {
+            if(isPaused) {
+                setTimeout(tracePoints, 100);
+                return;
+            }
+
             if(ptIdx >= currentPathPoints.length) {
                 pIdx++;
                 setTimeout(drawNextPath, 150);
