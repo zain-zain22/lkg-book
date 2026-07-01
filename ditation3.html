@@ -9,7 +9,7 @@
 :root {
     --arabic-font-size: 65px;   
     --box-left-move: 0px;       
-    --box-top-move: 0px;        
+    --box-top-move: 2px;        
 }
 
 * { box-sizing: border-box; }
@@ -71,12 +71,9 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
     text-align: left;
     margin-bottom: 3px;
 }
-
-/* 🟥 ആനിമേഷൻ ബോർഡ് സ്ക്വയർ രൂപത്തിലാക്കി */
 .full-width-board {
-    width: 350px;        
-    height: 350px;       
-    margin: 0 auto;      
+    width: 350px;
+    height: 350px; 
     background: #fff;
     border: 2px solid #e67e22;
     border-radius: 8px;
@@ -96,7 +93,7 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
 
 .arbi-text {
     font-size: var(--arabic-font-size);
-    font-family: '!F Tahrir New', '!F Tahrir Old', sans-serif;
+    font-family: 'Arabic Typesetting', 'Traditional Arabic', 'Amiri', sans-serif;
     color: #2c3e50;
     direction: rtl;
     width: 100%;
@@ -107,11 +104,6 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
     justify-content: center;
     align-items: center;
     white-space: nowrap;
-    line-height: 1;
-    font-variant-ligatures: common-ligatures discretionary-ligatures;
-    text-rendering: optimizeLegibility;
-    -webkit-font-feature-settings: "liga" on, "clig" on;
-    font-feature-settings: "liga" on, "clig" on;
     transform: translate(var(--box-left-move), var(--box-top-move)); 
 }
 
@@ -167,13 +159,6 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
 }
 .btn-pause.paused { background: #2ecc71; }
 
-@media screen and (max-width: 400px) {
-    .full-width-board {
-        width: 280px;   
-        height: 280px;  
-    }
-}
-
 @media screen and (max-height: 500px) and (orientation: landscape) {
     body { padding: 4px; }
     .container { height: 97vh; padding: 6px; }
@@ -185,7 +170,7 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
         background-size: 100% 105px;
         background-position: 0 25px, 0 45px, 0 65px, 0 85px;
     }
-    .full-width-board { height: 160px; width: 160px; }
+    .full-width-board { height: 105px; }
     .writing-board-section { margin-top: 2px; padding-top: 2px; }
     .writing-title { font-size: 12px; margin-bottom: 1px; }
 }
@@ -204,21 +189,23 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
     
     <label>ഫോണ്ട് മാറ്റുക:</label>
     <select id="fontSelect" onchange="adjustText()">
-        <option value="'!F Tahrir New', '!F Tahrir New Regular'">!F Tahrir New (അറബി-മലയാളം)</option>
-        <option value="'!F Tahrir Old', '!F Tahrir Old Regular'">!F Tahrir Old (അറബി-മലയാളം)</option>
-        <option value="'KFGQPC Uthmanic Script HAFS', 'KFGQPC Uthmanic Script HAFS Regular'">KFGQPC Uthmanic HAFS</option>
         <option value="'Arabic Typesetting'">Arabic Typesetting</option>
+        <option value="'Traditional Arabic'">Traditional Arabic</option>
+        <option value="'Lateef'">Lateef (സുന്ദരമായ ഫോണ്ട്)</option>
+        <option value="'Scheherazade New'">Scheherazade New</option>
+        <option value="'Simplified Arabic'">Simplified Arabic</option>
+        <option value="'Amiri'">Amiri Font</option>
         <option value="sans-serif">Normal Sans-Serif</option>
     </select>
 
     <label>വലിപ്പം: <span id="valSize">65px</span></label>
     <input type="range" id="sliderSize" min="20" max="200" value="65" oninput="adjustText()">
     
-    <label>ഉയരം: <span id="valTop">0px</span></label>
-    <input type="range" id="sliderTop" min="-100" max="100" value="0" oninput="adjustText()">
+    <label>ഉയരം: <span id="valTop">2px</span></label>
+    <input type="range" id="sliderTop" min="-40" max="40" value="2" oninput="adjustText()">
     
     <label>ഇടത്/വലത്: <span id="valLeft">0px</span></label>
-    <input type="range" id="sliderLeft" min="-100" max="100" value="0" oninput="adjustText()">
+    <input type="range" id="sliderLeft" min="-80" max="80" value="0" oninput="adjustText()">
 
     <button id="pauseBtn" class="btn-pause" onclick="togglePause()"><i class="fa-solid fa-pause"></i> Pause</button>
 </div>
@@ -232,7 +219,7 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
         <label style="color:white;">👤 കുട്ടിയുടെ പേര്:</label>
         <select id="studentSelect"></select>
         
-        <button class="btn btn-green" onclick="startGame()">Class Start</button>
+        <button class="btn btn-green" onclick="startGame()">🚀 ക്ലാസ്സ് ആരംഭിക്കുക</button>
     </div>
 </div>
 
@@ -262,7 +249,6 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
     <div class="writing-board-section" id="writingSection" style="display:none;">
         <div class="writing-title"><i class="fa-solid fa-pen-fancy"></i> എഴുതുന്ന രൂപം ശ്രദ്ധിക്കുക:</div>
         <div class="full-width-board">
-            <!-- 🟥 viewBox മാറ്റിയതിലൂടെ എഴുത്ത് വലുതാക്കി -->
             <svg class="hw-canvas-svg" id="svgWritingBoard" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" preserveAspectRatio="xMidYMid meet"></svg>
         </div>
     </div>
@@ -299,7 +285,7 @@ function adjustText() {
     let texts = document.querySelectorAll('.arbi-text');
     texts.forEach(txt => {
         txt.style.fontSize = size + 'px';
-        txt.style.fontFamily = chosenFont + ", sans-serif"; 
+        txt.style.fontFamily = chosenFont + ", 'Amiri', sans-serif"; 
         txt.style.transform = `translate(${left}px, ${top}px)`;
     });
 }
@@ -320,9 +306,13 @@ function makeElementDraggable(elmnt) {
         e = e || window.event;
         let clientX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
         let clientY = e.type === "touchstart" ? e.touches[0].clientY : e.clientY;
-        pos3 = clientX; pos4 = clientY;
+        
+        pos3 = clientX;
+        pos4 = clientY;
+        
         document.onmouseup = closeDragElement;
         document.onmousemove = elementDrag;
+        
         document.ontouchend = closeDragElement;
         document.ontouchmove = elementDrag;
     }
@@ -330,4 +320,297 @@ function makeElementDraggable(elmnt) {
     function elementDrag(e) {
         e = e || window.event;
         let clientX = e.type === "touchmove" ? e.touches[0].clientX : e.clientX;
-        let clientNormally I can help with things like this, but I don't seem to have access to that content. You can try again or ask me for something else.
+        let clientY = e.type === "touchmove" ? e.touches[0].clientY : e.clientY;
+        
+        pos1 = pos3 - clientX;
+        pos2 = pos4 - clientY;
+        pos3 = clientX;
+        pos4 = clientY;
+        
+        elmnt.style.top = (elmnt.offsetTop - pos2) + "px";
+        elmnt.style.left = (elmnt.offsetLeft - pos1) + "px";
+        elmnt.style.right = "auto"; 
+    }
+
+    function closeDragElement() {
+        document.onmouseup = null;
+        document.onmousemove = null;
+        document.ontouchend = null;
+        document.ontouchmove = null;
+    }
+}
+
+async function loadDataFromJSON() {
+    try {
+        let response = await fetch('data/data.json?t=' + Date.now());
+        let rawData = await response.json();
+        
+        if(rawData.madrassas) {
+            let mSelect = document.getElementById('madrasaSelect');
+            mSelect.innerHTML = '';
+            rawData.madrassas.forEach(m => {
+                let opt = document.createElement('option');
+                opt.value = m.name; opt.innerText = m.name;
+                mSelect.appendChild(opt);
+            });
+            window.schoolConfig = rawData.madrassas;
+            updateStudentDropdown();
+        }
+        
+        if(rawData.words && Array.isArray(rawData.words)) {
+            let totalWords = rawData.words;
+            allWordsList = totalWords.length > 30 ? totalWords.slice(-30) : totalWords;
+            currentQuestionIndex = 0; 
+            console.log("ഗെയിമിനായി ലോഡ് ചെയ്ത ആകെ വാക്കുകൾ:", allWordsList.length);
+        }
+    } catch (e) {
+        alert("ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല!");
+    }
+}
+
+function updateStudentDropdown() {
+    let currentMadrasa = document.getElementById('madrasaSelect').value;
+    let sSelect = document.getElementById('studentSelect');
+    sSelect.innerHTML = '';
+    if(window.schoolConfig) {
+        let found = window.schoolConfig.find(m => m.name === currentMadrasa);
+        if(found && found.students) {
+            found.students.forEach(student => {
+                let opt = document.createElement('option');
+                opt.value = student; opt.innerText = student;
+                sSelect.appendChild(opt);
+            });
+        }
+    }
+}
+
+function unlockAudio() {
+    if (!audioContextUnlocked) {
+        let context = new (window.AudioContext || window.webkitAudioContext)();
+        if (context.state === 'suspended') {
+            context.resume();
+        }
+        audioContextUnlocked = true;
+    }
+}
+
+function startGame() {
+    unlockAudio(); 
+    let student = document.getElementById('studentSelect').value;
+    if(!student) return alert("പേര് തിരഞ്ഞെടുക്കുക!");
+    if(allWordsList.length < 1) return alert("വാക്കുകൾ ലഭ്യമല്ല!");
+    
+    document.getElementById('studentHeading').innerText = `👤 കുട്ടി: ${student}`;
+    document.getElementById('startOverlay').style.display = 'none';
+    document.getElementById('gameContent').style.display = 'block';
+    document.getElementById('liveTool').style.display = 'block';
+    
+    generateQuestion();
+}
+
+function generateQuestion() {
+    if(currentQuestionIndex >= allWordsList.length) {
+        if(currentAudio) currentAudio.pause();
+        clearInterval(timerInterval);
+        document.getElementById('liveTool').style.display = 'none';
+        document.getElementById('gameContent').innerHTML = `
+            <div style="margin-top: 18vh;">
+                <h2 style="color:#2ecc71; font-size:30px; margin-bottom:15px;">🎉 എല്ലാ വാക്കുകളും കഴിഞ്ഞു! 🎉</h2>
+                <button class="btn-restart" onclick="location.reload();"><i class="fa-solid fa-rotate-right"></i> വീണ്ടും കളിക്കുക</button>
+            </div>
+        `;
+        return;
+    }
+
+    isPaused = false;
+    let pBtn = document.getElementById('pauseBtn');
+    pBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+    pBtn.classList.remove('paused');
+
+    document.getElementById('tickLeft').style.display = 'none';
+    document.getElementById('tickRight').style.display = 'none';
+    document.getElementById('writingSection').style.display = 'none';
+    document.getElementById('svgWritingBoard').innerHTML = '';
+
+    targetWord = allWordsList[currentQuestionIndex];
+
+    let alternativeWords = allWordsList.filter(w => w.arbiText !== targetWord.arbiText);
+    let randomAlternative = alternativeWords.length > 0 ? alternativeWords[Math.floor(Math.random() * alternativeWords.length)] : targetWord;
+
+    if(Math.random() > 0.5) {
+        leftWord = targetWord;
+        rightWord = randomAlternative;
+    } else {
+        leftWord = randomAlternative;
+        rightWord = targetWord;
+    }
+
+    document.getElementById('textLeft').innerText = leftWord.arbiText || '';
+    document.getElementById('textRight').innerText = rightWord.arbiText || '';
+
+    adjustText(); 
+    playTargetAudioLoop();
+    
+    timeLeft = maxDuration; 
+    startTimer();
+}
+
+function playTargetAudioLoop() {
+    if(!targetWord || !targetWord.audio) return;
+    if(currentAudio) currentAudio.pause();
+    
+    let audioPath = targetWord.audio;
+    if (!audioPath.startsWith('data/') && !audioPath.startsWith('http')) {
+        audioPath = 'data/' + audioPath;
+    }
+    
+    currentAudio = new Audio(audioPath + '?t=' + Date.now());
+    currentAudio.loop = true; 
+    
+    let playPromise = currentAudio.play();
+    if (playPromise !== undefined) {
+        playPromise.catch(error => {
+            console.log("ക്രോം ഓഡിയോ തടഞ്ഞു, സ്ക്രീൻ ക്ലിക്കിനായി കാക്കുന്നു...", error);
+            document.addEventListener('click', function unlockAndPlay() {
+                if(!isPaused) currentAudio.play();
+                document.removeEventListener('click', unlockAndPlay);
+            }, { once: true });
+        });
+    }
+}
+
+function startTimer() {
+    clearInterval(timerInterval);
+    let bar = document.getElementById('timerBar');
+    
+    timerInterval = setInterval(() => {
+        if(!isPaused) {
+            timeLeft -= 0.1;
+            let percentage = (timeLeft / maxDuration) * 100;
+            bar.style.width = percentage + '%';
+            
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                handleTimeoutAndReveal();
+            }
+        }
+    }, 100);
+}
+
+function togglePause() {
+    let pBtn = document.getElementById('pauseBtn');
+    if(!currentAudio) return;
+
+    if(!isPaused) {
+        isPaused = true;
+        currentAudio.pause(); 
+        pBtn.innerHTML = '<i class="fa-solid fa-play"></i> Play';
+        pBtn.classList.add('paused');
+    } else {
+        isPaused = false;
+        currentAudio.play(); 
+        pBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+        pBtn.classList.remove('paused');
+    }
+}
+
+function handleTimeoutAndReveal() {
+    if(currentAudio) {
+        currentAudio.loop = false;
+        currentAudio.pause();
+    }
+
+    let correctSide = (targetWord === leftWord) ? 'Left' : 'Right';
+    document.getElementById('tick' + correctSide).style.display = 'block';
+    document.getElementById('writingSection').style.display = 'block';
+
+    currentQuestionIndex++;
+
+    if(targetWord.writingPaths && targetWord.writingPaths.length > 0) {
+        animateHandwritingWithPen('svgWritingBoard', targetWord.writingPaths);
+    } else {
+        setTimeout(generateQuestion, 3000);
+    }
+}
+
+function animateHandwritingWithPen(svgId, pathsData) {
+    let board = document.getElementById(svgId);
+    board.innerHTML = ""; 
+    
+    let penImg = document.createElementNS("http://www.w3.org/2000/svg", "image");
+    penImg.setAttributeNS("http://www.w3.org/1999/xlink", "href", "hand.png"); 
+    penImg.setAttribute("width", "350");
+    penImg.setAttribute("height", "350");
+    penImg.setAttribute("style", "position: absolute; z-index: 100; pointer-events: none; transition: transform 0.05s linear;");
+    penImg.style.display = "none";
+    
+    let pIdx = 0;
+    
+    function drawNextPath() {
+        if(isPaused) {
+            setTimeout(drawNextPath, 100);
+            return;
+        }
+
+        if(pIdx >= pathsData.length) {
+            penImg.style.display = "none";
+            setTimeout(generateQuestion, 3000);
+            return;
+        }
+        
+        let currentPathPoints = pathsData[pIdx];
+        if(!currentPathPoints || currentPathPoints.length === 0) {
+            pIdx++; drawNextPath(); return;
+        }
+        
+        let g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        let svgPathsArray = [];
+        
+        for(let i=0; i<16; i++) {
+            let p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            p.setAttribute("transform", `translate(${(i-8)*0.4}, ${-(i-8)})`);
+            p.setAttribute("stroke", "#e74c3c"); 
+            p.setAttribute("stroke-width", "3");
+            p.setAttribute("fill", "none");
+            p.setAttribute("stroke-linecap", "round");
+            g.appendChild(p);
+            svgPathsArray.push(p);
+        }
+        board.appendChild(g);
+        board.appendChild(penImg);
+        penImg.style.display = "block";
+        
+        let ptIdx = 0;
+        let dStr = `M ${currentPathPoints[0].x} ${currentPathPoints[0].y}`;
+        
+        function tracePoints() {
+            if(isPaused) {
+                setTimeout(tracePoints, 100);
+                return;
+            }
+
+            if(ptIdx >= currentPathPoints.length) {
+                pIdx++;
+                setTimeout(drawNextPath, 150);
+                return;
+            }
+            
+            let pt = currentPathPoints[ptIdx];
+            if(ptIdx === 0) dStr = `M ${pt.x} ${pt.y}`;
+            else dStr += ` L ${pt.x} ${pt.y}`;
+            
+            svgPathsArray.forEach(p => p.setAttribute("d", dStr));
+            
+            penImg.setAttribute("x", pt.x - 45); 
+            penImg.setAttribute("y", pt.y - 70); 
+
+            ptIdx++;
+            requestAnimationFrame(tracePoints);
+        }
+        tracePoints();
+    }
+    drawNextPath();
+}
+</script>
+</body>
+</html>
