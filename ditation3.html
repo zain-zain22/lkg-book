@@ -93,7 +93,7 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
 
 .arbi-text {
     font-size: var(--arabic-font-size);
-    font-family: 'Arabic Typesetting', 'Traditional Arabic', 'Amiri', sans-serif;
+    font-family: 'Alphath', 'Tahrir', 'Arabic Typesetting', sans-serif;
     color: #2c3e50;
     direction: rtl;
     width: 100%;
@@ -189,18 +189,14 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
     
     <label>ഫോണ്ട് മാറ്റുക:</label>
     <select id="fontSelect" onchange="adjustText()">
-        <!-- 📝 ചിത്രത്തിലുള്ള കൃത്യമായ ഫോണ്ട് പേരുകൾ ഇവിടെ അപ്ഡേറ്റ് ചെയ്തിട്ടുണ്ട് -->
-        <option value="'KFGQPC Uthmanic Script HAFS', 'KFGQPC Uthmanic Script HAFS Regular'">KFGQPC Uthmanic HAFS</option>
-        <option value="'KFGQPC HafsEx1 Uthmanic Script', 'KFGQPC HafsEx1 Uthmanic Script Regular'">KFGQPC HafsEx1</option>
+        <!-- 🟢 നിങ്ങളുടെ സിസ്റ്റത്തിലുള്ള കൃത്യമായ പേര് ഇവിടെ ചേർത്തിട്ടുണ്ട് -->
+        <option value="'!F Tahrir New', '!F Tahrir New Regular'">!F Tahrir New (അറബി-മലയാളം)</option>
+        <option value="'!F Tahrir Old', '!F Tahrir Old Regular'">!F Tahrir Old (അറബി-മലയാളം)</option>
         <option value="'Arabic Typesetting'">Arabic Typesetting</option>
         <option value="'Traditional Arabic'">Traditional Arabic</option>
-        <option value="'Lateef'">Lateef (സുന്ദരമായ ഫോണ്ട്)</option>
-        <option value="'Scheherazade New'">Scheherazade New</option>
-        <option value="'Simplified Arabic'">Simplified Arabic</option>
-        <option value="'Amiri'">Amiri Font</option>
+        <option value="'Lateef'">Lateef</option>
         <option value="sans-serif">Normal Sans-Serif</option>
     </select>
-
     <label>വലിപ്പം: <span id="valSize">65px</span></label>
     <input type="range" id="sliderSize" min="20" max="200" value="65" oninput="adjustText()">
     
@@ -288,7 +284,7 @@ function adjustText() {
     let texts = document.querySelectorAll('.arbi-text');
     texts.forEach(txt => {
         txt.style.fontSize = size + 'px';
-        txt.style.fontFamily = chosenFont + ", 'Amiri', sans-serif"; 
+        txt.style.fontFamily = chosenFont + ", 'Arabic Typesetting', sans-serif"; 
         txt.style.transform = `translate(${left}px, ${top}px)`;
     });
 }
