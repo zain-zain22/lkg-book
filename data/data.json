@@ -12,8 +12,8 @@
     ],
     "words": [
         {
-            "mal": "അബ്",
-            "arbiText": "أَب",
+            "mal": "ഉപ്പ",
+            "arbiText": "اُپَّ",
             "audio": "audio_live_1782900359109_r1.mp3",
             "writingPaths": null
         },
@@ -24,15 +24,27 @@
             "writingPaths": null
         },
         {
-            "mal": "ഇനാഹ്",
-            "arbiText": "إِنَاء",
+            "mal": "പാത്രം",
+            "arbiText": "پَاتْرمٛ",
             "audio": "audio_live_1782900433430_r3.mp3",
             "writingPaths": null
         },
         {
-            "mal": "ഫഅർ",
-            "arbiText": "فَأْر",
+            "mal": "എലി",
+            "arbiText": "ا٘لِ",
             "audio": "audio_live_1782900465266_r4.mp3",
+            "writingPaths": null
+        },
+        {
+            "mal": "🥰",
+            "arbiText": "بَأْ",
+            "audio": "audio_live_1782901344826_r5.mp3",
+            "writingPaths": null
+        },
+        {
+            "mal": "🥰",
+            "arbiText": "أَبٌ",
+            "audio": "audio_live_1782901351932_r6.mp3",
             "writingPaths": null
         }
     ]
