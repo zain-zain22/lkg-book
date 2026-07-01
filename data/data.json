@@ -10,5 +10,72 @@
             ]
         }
     ],
-    "words": []
+    "words": [
+        {
+            "mal": ".",
+            "arbiText": "أَب",
+            "audio": "audio_live_1782899900578_r1.mp3",
+            "writingPaths": null
+        },
+        {
+            "mal": ".",
+            "arbiText": "أُمّ",
+            "audio": "audio_live_1782899907136_r2.mp3",
+            "writingPaths": null
+        },
+        {
+            "mal": ".",
+            "arbiText": "إِنَاء",
+            "audio": "audio_live_1782899915409_r3.mp3",
+            "writingPaths": null
+        },
+        {
+            "mal": ".",
+            "arbiText": "فَأْر",
+            "audio": "audio_live_1782899921890_r4.mp3",
+            "writingPaths": null
+        },
+        {
+            "mal": ".",
+            "arbiText": "بَأْ",
+            "audio": "audio_live_1782899928658_r5.mp3",
+            "writingPaths": null
+        },
+        {
+            "mal": ".",
+            "arbiText": "كَأْسٌ",
+            "audio": "audio_live_1782899935787_r6.mp3",
+            "writingPaths": null
+        },
+        {
+            "mal": ".",
+            "arbiText": "بَأسٌ",
+            "audio": "audio_live_1782899942275_r7.mp3",
+            "writingPaths": null
+        },
+        {
+            "mal": ".",
+            "arbiText": "فَأْسٌ",
+            "audio": "audio_live_1782899949257_r8.mp3",
+            "writingPaths": null
+        },
+        {
+            "mal": ".",
+            "arbiText": "أُرَبٌ",
+            "audio": "audio_live_1782899973729_r11.mp3",
+            "writingPaths": null
+        },
+        {
+            "mal": ".",
+            "arbiText": "أَسَدٌ",
+            "audio": "audio_live_1782899980375_r12.mp3",
+            "writingPaths": null
+        },
+        {
+            "mal": ".",
+            "arbiText": "إِبَرٌ",
+            "audio": "audio_live_1782899986733_r13.mp3",
+            "writingPaths": null
+        }
+    ]
 }
