@@ -13,7 +13,7 @@
     "words": [
         {
             "mal": "ഉപ്പ",
-            "arbiText": "اُپَّ",
+            "arbiText": "أَب",
             "audio": "audio_live_1782900359109_r1.mp3",
             "writingPaths": null
         },
@@ -25,13 +25,13 @@
         },
         {
             "mal": "പാത്രം",
-            "arbiText": "پَاتْرمٛ",
+            "arbiText": "إِنَاء",
             "audio": "audio_live_1782900433430_r3.mp3",
             "writingPaths": null
         },
         {
             "mal": "എലി",
-            "arbiText": "ا٘لِ",
+            "arbiText": "فَأْر",
             "audio": "audio_live_1782900465266_r4.mp3",
             "writingPaths": null
         },
@@ -45,6 +45,78 @@
             "mal": "🥰",
             "arbiText": "أَبٌ",
             "audio": "audio_live_1782901351932_r6.mp3",
+            "writingPaths": null
+        },
+        {
+            "mal": "😁",
+            "arbiText": "بَأْسٌ",
+            "audio": "",
+            "writingPaths": null
+        },
+        {
+            "mal": "😂",
+            "arbiText": "كَأْسٌ",
+            "audio": "",
+            "writingPaths": null
+        },
+        {
+            "mal": "😃",
+            "arbiText": "فَأْسٌ",
+            "audio": "",
+            "writingPaths": null
+        },
+        {
+            "mal": "😄",
+            "arbiText": "رَأْسٌ",
+            "audio": "",
+            "writingPaths": null
+        },
+        {
+            "mal": "Duck",
+            "arbiText": "بَطََّة",
+            "audio": "",
+            "writingPaths": null
+        },
+        {
+            "mal": "😭",
+            "arbiText": "أَبْ",
+            "audio": "",
+            "writingPaths": null
+        },
+        {
+            "mal": "😃",
+            "arbiText": "إِبَرٌ",
+            "audio": "",
+            "writingPaths": null
+        },
+        {
+            "mal": "😊",
+            "arbiText": "وَرْدَة",
+            "audio": "",
+            "writingPaths": null
+        },
+        {
+            "mal": "☺️",
+            "arbiText": "أَوْ",
+            "audio": "",
+            "writingPaths": null
+        },
+        {
+            "mal": "😉",
+            "arbiText": "وَلَدٌ",
+            "audio": "",
+            "writingPaths": null
+        },
+        {
+            "mal": "😉",
+            "arbiText": "وُرْدٌ",
+            "audio": "",
+            "writingPaths": null
+        },
+        {
+            "mal": "😅",
+            "arbiText": "وِتْرٌ",
+            "audio": "",
             "writingPaths": null
         }
     ]
