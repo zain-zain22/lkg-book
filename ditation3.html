@@ -91,7 +91,6 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
     pointer-events: none;
 }
 
-/* 🌟 ഡിഫോൾട്ടായി 'Arabic Typesetting' ഫോണ്ട് ഇവിടെ സെറ്റ് ചെയ്തിട്ടുണ്ട് */
 .arbi-text {
     font-size: var(--arabic-font-size);
     font-family: 'Arabic Typesetting', 'Traditional Arabic', 'Amiri', sans-serif;
@@ -113,7 +112,6 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
 .timer-container { width: 100%; background: #ddd; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
 .timer-bar { height: 100%; background: #e74c3c; width: 100%; transition: width 0.1s linear; }
 
-/* 🛠️ കൺട്രോളർ ബോക്സിന്റെ വീതി ഫോണ്ട് സെലക്ഷൻ കൊള്ളിക്കാൻ പാകത്തിന് 180px ആക്കി */
 .alignment-controller {
     position: fixed;
     top: 15px;
@@ -143,6 +141,24 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
 .alignment-controller input, .alignment-controller select { width: 100%; margin: 2px 0; }
 .alignment-controller select { background: #34495e; color: white; border: 1px solid #7f8c8d; padding: 3px; border-radius: 4px;}
 
+.btn-pause {
+    background: #e67e22;
+    color: white;
+    border: none;
+    padding: 5px;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 4px;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+}
+.btn-pause.paused { background: #2ecc71; }
+
 @media screen and (max-height: 500px) and (orientation: landscape) {
     body { padding: 4px; }
     .container { height: 97vh; padding: 6px; }
@@ -171,9 +187,11 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
 <div class="alignment-controller" id="liveTool" style="display:none;">
     <div class="drag-header" id="dragHandle"><i class="fa-solid fa-arrows-to-dot"></i> ഇവിടെ പിടിച്ചു നീക്കുക</div>
     
-    <!-- 🔤 ഇവിടെ പുതിയ ഫോണ്ട് സെലക്ഷൻ മെനു ഉൾപ്പെടുത്തിയിട്ടുണ്ട് -->
     <label>ഫോണ്ട് മാറ്റുക:</label>
     <select id="fontSelect" onchange="adjustText()">
+        <!-- 📝 ചിത്രത്തിലുള്ള കൃത്യമായ ഫോണ്ട് പേരുകൾ ഇവിടെ അപ്ഡേറ്റ് ചെയ്തിട്ടുണ്ട് -->
+        <option value="'KFGQPC Uthmanic Script HAFS', 'KFGQPC Uthmanic Script HAFS Regular'">KFGQPC Uthmanic HAFS</option>
+        <option value="'KFGQPC HafsEx1 Uthmanic Script', 'KFGQPC HafsEx1 Uthmanic Script Regular'">KFGQPC HafsEx1</option>
         <option value="'Arabic Typesetting'">Arabic Typesetting</option>
         <option value="'Traditional Arabic'">Traditional Arabic</option>
         <option value="'Lateef'">Lateef (സുന്ദരമായ ഫോണ്ട്)</option>
@@ -184,13 +202,15 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
     </select>
 
     <label>വലിപ്പം: <span id="valSize">65px</span></label>
-    <input type="range" id="sliderSize" min="20" max="100" value="65" oninput="adjustText()">
+    <input type="range" id="sliderSize" min="20" max="200" value="65" oninput="adjustText()">
     
     <label>ഉയരം: <span id="valTop">2px</span></label>
     <input type="range" id="sliderTop" min="-40" max="40" value="2" oninput="adjustText()">
     
     <label>ഇടത്/വലത്: <span id="valLeft">0px</span></label>
     <input type="range" id="sliderLeft" min="-80" max="80" value="0" oninput="adjustText()">
+
+    <button id="pauseBtn" class="btn-pause" onclick="togglePause()"><i class="fa-solid fa-pause"></i> Pause</button>
 </div>
 
 <div id="startOverlay" class="overlay-screen">
@@ -202,7 +222,7 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
         <label style="color:white;">👤 കുട്ടിയുടെ പേര്:</label>
         <select id="studentSelect"></select>
         
-        <button class="btn btn-green" onclick="startGame()">🚀 ക്ലാസ്സ് ആരംഭിക്കുക</button>
+        <button class="btn btn-green" onclick="startGame()">Class Start</button>
     </div>
 </div>
 
@@ -238,13 +258,16 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
 </div>
 
 <script>
-let last30Words = [];
+let allWordsList = []; 
+let currentQuestionIndex = 0; 
 let leftWord = null;
 let rightWord = null;
 let targetWord = null;
 let currentAudio = null;
 let timerInterval = null;
-let maxDuration = 30;
+let maxDuration = 60; 
+let timeLeft = 60;   
+let isPaused = false; 
 let audioContextUnlocked = false; 
 
 window.onload = function() {
@@ -252,7 +275,6 @@ window.onload = function() {
     makeElementDraggable(document.getElementById("liveTool"));
 }
 
-/* 🛠️ ഫോണ്ട് സെലക്ഷൻ കൂടി ഉൾപ്പെടുത്തി അപ്ഡേറ്റ് ചെയ്ത ഫങ്ഷൻ */
 function adjustText() {
     let size = document.getElementById('sliderSize').value;
     let top = document.getElementById('sliderTop').value;
@@ -266,7 +288,7 @@ function adjustText() {
     let texts = document.querySelectorAll('.arbi-text');
     texts.forEach(txt => {
         txt.style.fontSize = size + 'px';
-        txt.style.fontFamily = chosenFont + ", 'Amiri', sans-serif"; // സെലക്ട് ചെയ്ത ഫോണ്ട് അപ്ലൈ ചെയ്യുന്നു
+        txt.style.fontFamily = chosenFont + ", 'Amiri', sans-serif"; 
         txt.style.transform = `translate(${left}px, ${top}px)`;
     });
 }
@@ -339,7 +361,10 @@ async function loadDataFromJSON() {
         }
         
         if(rawData.words && Array.isArray(rawData.words)) {
-            last30Words = rawData.words.slice(-30);
+            let totalWords = rawData.words;
+            allWordsList = totalWords.length > 30 ? totalWords.slice(-30) : totalWords;
+            currentQuestionIndex = 0; 
+            console.log("ഗെയിമിനായി ലോഡ് ചെയ്ത ആകെ വാക്കുകൾ:", allWordsList.length);
         }
     } catch (e) {
         alert("ഡാറ്റ ലോഡ് ചെയ്യാൻ കഴിഞ്ഞില്ല!");
@@ -376,7 +401,7 @@ function startGame() {
     unlockAudio(); 
     let student = document.getElementById('studentSelect').value;
     if(!student) return alert("പേര് തിരഞ്ഞെടുക്കുക!");
-    if(last30Words.length < 2) return alert("മിനിമം 2 വാക്കുകൾ വേണം!");
+    if(allWordsList.length < 1) return alert("വാക്കുകൾ ലഭ്യമല്ല!");
     
     document.getElementById('studentHeading').innerText = `👤 കുട്ടി: ${student}`;
     document.getElementById('startOverlay').style.display = 'none';
@@ -387,7 +412,7 @@ function startGame() {
 }
 
 function generateQuestion() {
-    if(last30Words.length < 2) {
+    if(currentQuestionIndex >= allWordsList.length) {
         if(currentAudio) currentAudio.pause();
         clearInterval(timerInterval);
         document.getElementById('liveTool').style.display = 'none';
@@ -400,22 +425,36 @@ function generateQuestion() {
         return;
     }
 
+    isPaused = false;
+    let pBtn = document.getElementById('pauseBtn');
+    pBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+    pBtn.classList.remove('paused');
+
     document.getElementById('tickLeft').style.display = 'none';
     document.getElementById('tickRight').style.display = 'none';
     document.getElementById('writingSection').style.display = 'none';
     document.getElementById('svgWritingBoard').innerHTML = '';
 
-    let shuffled = [...last30Words].sort(() => 0.5 - Math.random());
-    leftWord = shuffled[0];
-    rightWord = shuffled[1];
-    
-    targetWord = Math.random() > 0.5 ? leftWord : rightWord;
+    targetWord = allWordsList[currentQuestionIndex];
+
+    let alternativeWords = allWordsList.filter(w => w.arbiText !== targetWord.arbiText);
+    let randomAlternative = alternativeWords.length > 0 ? alternativeWords[Math.floor(Math.random() * alternativeWords.length)] : targetWord;
+
+    if(Math.random() > 0.5) {
+        leftWord = targetWord;
+        rightWord = randomAlternative;
+    } else {
+        leftWord = randomAlternative;
+        rightWord = targetWord;
+    }
 
     document.getElementById('textLeft').innerText = leftWord.arbiText || '';
     document.getElementById('textRight').innerText = rightWord.arbiText || '';
 
     adjustText(); 
     playTargetAudioLoop();
+    
+    timeLeft = maxDuration; 
     startTimer();
 }
 
@@ -436,7 +475,7 @@ function playTargetAudioLoop() {
         playPromise.catch(error => {
             console.log("ക്രോം ഓഡിയോ തടഞ്ഞു, സ്ക്രീൻ ക്ലിക്കിനായി കാക്കുന്നു...", error);
             document.addEventListener('click', function unlockAndPlay() {
-                currentAudio.play();
+                if(!isPaused) currentAudio.play();
                 document.removeEventListener('click', unlockAndPlay);
             }, { once: true });
         });
@@ -445,19 +484,37 @@ function playTargetAudioLoop() {
 
 function startTimer() {
     clearInterval(timerInterval);
-    let timeLeft = maxDuration;
     let bar = document.getElementById('timerBar');
     
     timerInterval = setInterval(() => {
-        timeLeft -= 0.1;
-        let percentage = (timeLeft / maxDuration) * 100;
-        bar.style.width = percentage + '%';
-        
-        if(timeLeft <= 0) {
-            clearInterval(timerInterval);
-            handleTimeoutAndReveal();
+        if(!isPaused) {
+            timeLeft -= 0.1;
+            let percentage = (timeLeft / maxDuration) * 100;
+            bar.style.width = percentage + '%';
+            
+            if(timeLeft <= 0) {
+                clearInterval(timerInterval);
+                handleTimeoutAndReveal();
+            }
         }
     }, 100);
+}
+
+function togglePause() {
+    let pBtn = document.getElementById('pauseBtn');
+    if(!currentAudio) return;
+
+    if(!isPaused) {
+        isPaused = true;
+        currentAudio.pause(); 
+        pBtn.innerHTML = '<i class="fa-solid fa-play"></i> Play';
+        pBtn.classList.add('paused');
+    } else {
+        isPaused = false;
+        currentAudio.play(); 
+        pBtn.innerHTML = '<i class="fa-solid fa-pause"></i> Pause';
+        pBtn.classList.remove('paused');
+    }
 }
 
 function handleTimeoutAndReveal() {
@@ -470,7 +527,7 @@ function handleTimeoutAndReveal() {
     document.getElementById('tick' + correctSide).style.display = 'block';
     document.getElementById('writingSection').style.display = 'block';
 
-    last30Words = last30Words.filter(word => word !== targetWord);
+    currentQuestionIndex++;
 
     if(targetWord.writingPaths && targetWord.writingPaths.length > 0) {
         animateHandwritingWithPen('svgWritingBoard', targetWord.writingPaths);
@@ -493,6 +550,11 @@ function animateHandwritingWithPen(svgId, pathsData) {
     let pIdx = 0;
     
     function drawNextPath() {
+        if(isPaused) {
+            setTimeout(drawNextPath, 100);
+            return;
+        }
+
         if(pIdx >= pathsData.length) {
             penImg.style.display = "none";
             setTimeout(generateQuestion, 3000);
@@ -525,6 +587,11 @@ function animateHandwritingWithPen(svgId, pathsData) {
         let dStr = `M ${currentPathPoints[0].x} ${currentPathPoints[0].y}`;
         
         function tracePoints() {
+            if(isPaused) {
+                setTimeout(tracePoints, 100);
+                return;
+            }
+
             if(ptIdx >= currentPathPoints.length) {
                 pIdx++;
                 setTimeout(drawNextPath, 150);
