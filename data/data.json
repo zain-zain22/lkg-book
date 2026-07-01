@@ -10,18 +10,5 @@
             ]
         }
     ],
-    "words": [
-        {
-            "mal": "അബ്",
-            "arbiText": "اَബۡ",
-            "audio": "audio_live_1782897770593_r3.mp3",
-            "writingPaths": null
-        },
-        {
-            "mal": "ഉമ്മ്",
-            "arbiText": "اُمّ",
-            "audio": "audio_live_1782897850181_r4.mp3",
-            "writingPaths": null
-        }
-    ]
+    "words": []
 }
