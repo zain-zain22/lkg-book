@@ -196,8 +196,12 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
 <div class="alignment-controller" id="liveTool" style="display:none;">
     <div class="drag-header" id="dragHandle"><i class="fa-solid fa-arrows-to-dot"></i> ഇവിടെ പിടിച്ചു നീക്കുക</div>
     
-    <label>ഫോണ്ട് മാറ്റുക:</label>
+       <label>ഫോണ്ട് മാറ്റുക:</label>
     <select id="fontSelect" onchange="adjustText()">
+        <option value="'KFGQPC Uthmanic Script HAFS'">KFGQPC Uthmanic HAFS (ഉസ്മാനി 1)</option>
+        <option value="'KFGQPC HafsEx1 Uthmanic Script'">KFGQPC HafsEx1 (ഉസ്മാനി 2)</option>
+        <option value="'!F Tahrir New'">!F Tahrir New (അറബി-മലയാളം)</option>
+        
         <option value="'Arabic Typesetting'">Arabic Typesetting</option>
         <option value="'Traditional Arabic'">Traditional Arabic</option>
         <option value="'Lateef'">Lateef (സുന്ദരമായ ഫോണ്ട്)</option>
@@ -206,6 +210,7 @@ h2 { color: #2c3e50; margin: 0; font-size: 20px; }
         <option value="'Amiri'">Amiri Font</option>
         <option value="sans-serif">Normal Sans-Serif</option>
     </select>
+
 
     <label>വലിപ്പം: <span id="valSize">65px</span></label>
     <input type="range" id="sliderSize" min="20" max="200" value="65" oninput="adjustText()">
