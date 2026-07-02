@@ -241,7 +241,45 @@ let audioContextUnlocked = false; // 🔊 ഓഡിയോ സ്റ്റാറ�
 window.onload = function() {
     loadDataFromJSON();
     makeElementDraggable(document.getElementById("liveTool"));
+    // 🟢 സിസ്റ്റത്തിലെ എല്ലാ ഫോണ്ടുകളും ലിസ്റ്റിലേക്ക് കൊണ്ടുവരാൻ താഴെയുള്ള ഫങ്ഷൻ കോൾ ചെയ്യുക
+    loadLocalFontsToDropdown();
 }
+
+// 🟢 സിസ്റ്റം ഫോണ്ടുകൾ തനിയെ എടുക്കാനുള്ള പുതിയ ഫങ്ഷൻ
+async function loadLocalFontsToDropdown() {
+    let fontSelect = document.getElementById('fontSelect');
+    
+    // ബ്രൗസറിൽ ഈ ഫീച്ചർ ലഭ്യമാണോ എന്ന് നോക്കുന്നു
+    if (!window.queryLocalFonts) {
+        console.log("ഈ ബ്രൗസറിൽ സിസ്റ്റം ഫോണ്ടുകൾ തനിയെ എടുക്കാനുള്ള ഫീച്ചർ ലഭ്യമല്ല.");
+        return;
+    }
+    
+    try {
+        // സിസ്റ്റത്തിലെ ഫോണ്ടുകൾ എടുക്കാൻ അനുവാദം ചോദിക്കുന്നു
+        const availableFonts = await window.queryLocalFonts();
+        
+        // ഒരേ ഫോണ്ട് പേര് വീണ്ടും വരാതിരിക്കാൻ ഒരു Set ഉണ്ടാക്കുന്നു
+        const fontNames = new Set();
+        availableFonts.forEach(font => fontNames.add(font.fullName));
+        
+        // ഫോണ്ടുകളെ അക്ഷരമാലാക്രമത്തിലാക്കുന്നു (Alphabetical order)
+        const sortedFonts = Array.from(fontNames).sort();
+        
+        // നിലവിലുള്ള ലിസ്റ്റിന് താഴേക്ക് സിസ്റ്റത്തിലെ ഫോണ്ടുകൾ ഓരോന്നായി ചേർക്കുന്നു
+        sortedFonts.forEach(fontName => {
+            let opt = document.createElement('option');
+            opt.value = `'${fontName}'`;
+            opt.innerText = fontName + " (System)";
+            fontSelect.appendChild(opt);
+        });
+        
+        console.log(`ആകെ ${sortedFonts.length} സിസ്റ്റം ഫോണ്ടുകൾ ലിസ്റ്റിൽ ചേർത്തു.`);
+    } catch (err) {
+        console.error("ഫോണ്ടുകൾ ലോഡ് ചെയ്യുന്നതിൽ തടസ്സം:", err);
+    }
+}
+
 
 function adjustText() {
     let size = document.getElementById('sliderSize').value;
