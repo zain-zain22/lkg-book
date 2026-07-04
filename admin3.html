@@ -808,46 +808,128 @@ currentZones = []; currentAudioBlobs = []; selectedImageFile = null; readingPath
 } 
 
 function renderExistingQuizList() { 
-let container = document.getElementById('existingQuizList'); container.innerHTML = ''; 
-if(quizMemory.length === 0) { container.innerHTML = '<p style="font-size:12px; color:#999; text-align:center;">ചോദ്യങ്ങൾ ഒന്നും ലഭ്യമല്ല.</p>'; return; } 
-quizMemory.forEach((quiz, idx) => { 
-let div = document.createElement('div'); div.className = 'manage-item'; 
-let previewText = quiz.qText ? ` - ${quiz.qText.substring(0, 20)}...` : '';
-div.innerHTML = `<div><b>ചോദ്യം ${idx + 1}</b><span style="color:#7f8c8d; font-size:12px;">${previewText}</span></div> 
-<div><button class="btn-danger" onclick="deleteQuiz(${idx})">🗑️ Delete</button></div> `; 
-container.appendChild(div); 
-}); 
-document.getElementById('quizCountBadge').innerText = `ആകെ ചോദ്യങ്ങൾ: ${quizMemory.length}`; 
-} 
-function deleteQuiz(index) { if(confirm(`തീർച്ചയായും ചോദ്യം ${index + 1} ഡിലീറ്റ് ചെയ്യണോ?`)) { quizMemory.splice(index, 1); renderExistingQuizList(); } } 
+    let container = document.getElementById('existingQuizList'); container.innerHTML = ''; 
+    if(quizMemory.length === 0) { container.innerHTML = '<p style="font-size:12px; color:#999; text-align:center;">ചോദ്യങ്ങൾ ഒന്നും ലഭ്യമല്ല.</p>'; return; } 
+    quizMemory.forEach((quiz, idx) => { 
+        let div = document.createElement('div'); div.className = 'manage-item'; 
+        let previewText = quiz.qText ? ` - ${quiz.qText.substring(0, 25)}...` : '';
+        let hasVoice = (quiz.blobs && quiz.blobs.q) || quiz.qSrc;
+        let voiceBadge = hasVoice ? '<span style="color:#2ecc71;font-size:11px;">(🔊 ശബ്ദമുണ്ട്)</span>' : '<span style="color:#e74c3c;font-size:11px;">(🎙️ ശബ്ദമില്ല)</span>';
+        
+        div.innerHTML = `<div><b>${idx + 1}</b>${previewText} ${voiceBadge}</div> 
+        <div style="display:flex; gap:2px;">
+            <button class="btn-action" style="background:#3498db; padding:4px 6px;" onclick="loadQuizToEdit(${idx})">🎙️ ശബ്ദം നൽകുക</button>
+            <button class="btn-danger" style="padding:4px 6px;" onclick="deleteQuiz(${idx})">🗑️</button>
+        </div>`; 
+        container.appendChild(div); 
+    }); 
+    document.getElementById('quizCountBadge').innerText = `ആകെ ചോദ്യങ്ങൾ: ${quizMemory.length}`; 
+}
+function deleteQuiz(index) { if(confirm(`തീർച്ചയായും ചോദ്യം ${index + 1} ഡിലീറ്റ് ചെയ്യണോ?`)) { quizMemory.splice(index, 1); renderExistingQuizList(); } }
 
-function startRecordingQuiz(type) { 
-currentType = type;
-navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => { 
-let options = { mimeType: 'audio/webm' }; if (MediaRecorder.isTypeSupported('audio/mp4')) options = { mimeType: 'audio/mp4' };
-mediaRecorder = new MediaRecorder(stream, options); mediaRecorder.start(); audioChunks = []; 
-mediaRecorder.addEventListener("dataavailable", event => audioChunks.push(event.data)); 
-mediaRecorder.addEventListener("stop", () => { 
-const audioBlob = new Blob(audioChunks, { type: options.mimeType }); recordedBlobs[currentType] = audioBlob; 
-let playback = document.getElementById('playback_' + currentType); playback.src = URL.createObjectURL(audioBlob); playback.style.display = 'block'; 
-}); 
-document.getElementById('startBtn_' + type).style.display = 'none'; document.getElementById('stopBtn_' + type).style.display = 'block'; document.getElementById('status_' + type).innerText = "🔴 റെക്കോർഡ് ചെയ്യുന്നു..."; 
-}).catch(() => alert("മൈക്ക് പെർമിഷൻ നൽകുക!")); 
-} 
-function stopRecordingQuiz(type) { mediaRecorder.stop(); document.getElementById('startBtn_' + type).style.display = 'block'; document.getElementById('stopBtn_' + type).style.display = 'none'; document.getElementById('status_' + type).innerText = "✅ റെക്കോർഡിംഗ് കഴിഞ്ഞു."; } 
+// ⚡ ഒറ്റയടിക്ക് ചോദ്യങ്ങൾ ഇമ്പോർട്ട് ചെയ്യാനുള്ള പുതിയ ഫങ്ഷൻ
+function importBulkQuizzes() {
+    let rawText = document.getElementById('bulkQuizInput').value.trim();
+    if(!rawText) return alert("ദയവായി ചോദ്യങ്ങൾ ബോക്സിൽ ടൈപ്പ് ചെയ്യുക!");
+    
+    let lines = rawText.split('\n');
+    let importedCount = 0;
+    
+    lines.forEach(line => {
+        let parts = line.split('|');
+        if(parts.length >= 4) {
+            quizMemory.push({
+                isNew: true,
+                qText: parts[0].trim(),
+                correctText: parts[1].trim(),
+                wrong1Text: parts[2].trim(),
+                wrong2Text: parts[3].trim(),
+                blobs: null,
+                qSrc: "", correctSrc: "", wrong1Src: "", wrong2Src: ""
+            });
+            importedCount++;
+        }
+    });
+    
+    if(importedCount > 0) {
+        alert(`🎉 വിജയകരം! ${importedCount} ചോദ്യങ്ങൾ ലിസ്റ്റിലേക്ക് ചേർത്തു. ഇനി താഴെയുള്ള ലിസ്റ്റിൽ നിന്ന് 'ശബ്ദം നൽകുക' ബട്ടൺ അമർത്തി ഓരോന്നിനും വോയ്സ് നൽകാം.`);
+        document.getElementById('bulkQuizInput').value = "";
+        renderExistingQuizList();
+    } else {
+        alert("⚠️ ഫോർമാറ്റ് മാറിയോ എന്ന് പരിശോധിക്കുക (ചോദ്യം | ശരിയുത്തരം | തെറ്റ്1 | തെറ്റ്2)");
+    }
+}
+
+// ⚡ ശബ്ദം നൽകാൻ വേണ്ടി ഫോമിലേക്ക് ചോദ്യം ലോഡ് ചെയ്യാൻ
+function loadQuizToEdit(index) {
+    let item = quizMemory[index];
+    document.getElementById('editingQuizIndex').value = index;
+    document.getElementById('quizFormTitle').innerText = `🎙️ ചോദ്യം നമ്പർ ${index + 1} തിരുത്തുക / ശബ്ദം നൽകുക:`;
+    
+    document.getElementById('text_q').value = item.qText || "";
+    document.getElementById('text_correct').value = item.correctText || "";
+    document.getElementById('text_wrong1').value = item.wrong1Text || "";
+    document.getElementById('text_wrong2').value = item.wrong2Text || "";
+    document.getElementById('btnSaveQuiz').innerText = "💾 ഈ ചോദ്യത്തിലെ മാറ്റങ്ങൾ സേവ് ചെയ്യുക";
+    
+    ['q', 'correct', 'wrong1', 'wrong2'].forEach(t => {
+        recordedBlobs[t] = null;
+        document.getElementById('playback_' + t).style.display = 'none';
+        document.getElementById('status_' + t).innerText = "";
+    });
+    
+    document.getElementById('quizFormTitle').scrollIntoView({ behavior: 'smooth' });
+}
 
 function addQuizToMemory() { 
-let qText = document.getElementById('text_q').value.trim();
-let correctText = document.getElementById('text_correct').value.trim();
-let wrong1Text = document.getElementById('text_wrong1').value.trim();
-let wrong2Text = document.getElementById('text_wrong2').value.trim();
-if(!qText || !correctText || !wrong1Text || !wrong2Text) return alert("ചോദ്യങ്ങളും ഉത്തരങ്ങളും എഴുതുക!");
-if(!recordedBlobs.q || !recordedBlobs.correct || !recordedBlobs.wrong1 || !recordedBlobs.wrong2) return alert("വോയ്സുകൾ റെക്കോർഡ് ചെയ്യുക!");
-quizMemory.push({ isNew: true, qText: qText, correctText: correctText, wrong1Text: wrong1Text, wrong2Text: wrong2Text, blobs: { q: recordedBlobs.q, correct: recordedBlobs.correct, wrong1: recordedBlobs.wrong1, wrong2: recordedBlobs.wrong2 } }); 
-alert("🎯 ചോദ്യം ലിസ്റ്റിലേക്ക് മാറ്റി!"); 
-['q', 'correct', 'wrong1', 'wrong2'].forEach(type => { recordedBlobs[type] = null; document.getElementById('text_' + type).value = ""; document.getElementById('playback_' + type).style.display = 'none'; document.getElementById('status_' + type).innerText = ""; });
-renderExistingQuizList(); 
-} 
+    let qText = document.getElementById('text_q').value.trim();
+    let correctText = document.getElementById('text_correct').value.trim();
+    let wrong1Text = document.getElementById('text_wrong1').value.trim();
+    let wrong2Text = document.getElementById('text_wrong2').value.trim();
+    let editIdx = document.getElementById('editingQuizIndex').value;
+    
+    if(!qText || !correctText || !wrong1Text || !wrong2Text) return alert("ചോദ്യങ്ങളും ഉത്തരങ്ങളും എഴുതുക!");
+    
+    if(editIdx !== "") {
+        let idx = parseInt(editIdx);
+        quizMemory[idx].qText = qText;
+        quizMemory[idx].correctText = correctText;
+        quizMemory[idx].wrong1Text = wrong1Text;
+        quizMemory[idx].wrong2Text = wrong2Text;
+        quizMemory[idx].isNew = true;
+        
+        if(recordedBlobs.q || recordedBlobs.correct || recordedBlobs.wrong1 || recordedBlobs.wrong2) {
+            quizMemory[idx].blobs = { q: recordedBlobs.q, correct: recordedBlobs.correct, wrong1: recordedBlobs.wrong1, wrong2: recordedBlobs.wrong2 };
+        }
+        alert("🎯 ചോദ്യം വിജയകരമായി പുതുക്കി!");
+    } else {
+        quizMemory.push({ 
+            isNew: true, 
+            qText: qText, 
+            correctText: correctText, 
+            wrong1Text: wrong1Text, 
+            wrong2Text: wrong2Text, 
+            blobs: (recordedBlobs.q) ? { q: recordedBlobs.q, correct: recordedBlobs.correct, wrong1: recordedBlobs.wrong1, wrong2: recordedBlobs.wrong2 } : null,
+            qSrc: "", correctSrc: "", wrong1Src: "", wrong2Src: ""
+        }); 
+        alert("🎯 ചോദ്യം ലിസ്റ്റിലേക്ക് മാറ്റി!"); 
+    }
+    clearQuizForm();
+    renderExistingQuizList(); 
+}
+
+function clearQuizForm() {
+    document.getElementById('editingQuizIndex').value = "";
+    document.getElementById('quizFormTitle').innerText = "🆕 പുതിയ ക്വിസ് ചോദ്യം ചേർക്കുക:";
+    document.getElementById('btnSaveQuiz').innerText = "➕ ഈ ചോദ്യം ലിസ്റ്റിലേക്ക് മാറ്റുക";
+    ['q', 'correct', 'wrong1', 'wrong2'].forEach(type => { 
+        recordedBlobs[type] = null; 
+        document.getElementById('text_' + type).value = ""; 
+        document.getElementById('playback_' + type).style.display = 'none'; 
+        document.getElementById('status_' + type).innerText = ""; 
+    });
+}
+
 
 function renderLiveWordsList() {
     let container = document.getElementById('liveWordsContainer'); container.innerHTML = '';
