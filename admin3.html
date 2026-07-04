@@ -1135,17 +1135,25 @@ await uploadToGitHubAPI("data/data_book.json", bookBlob, token);
 
 let quizJsonArray = []; 
 for(let i = 0; i < quizMemory.length; i++) { 
-let item = quizMemory[i]; let audioUrls = {}; 
-if(item.isNew) { 
-document.getElementById('loadText').innerText = `🎙️ ക്വിസ്സ് ചോദ്യം ${i + 1} ഓഡിയോകൾ അപ്‌ലോഡ് ചെയ്യുന്നു...`; 
-let types = ['q', 'correct', 'wrong1', 'wrong2']; 
-for(let t of types) { 
-let ext = item.blobs[t].type.includes("mp4") ? "mp4" : "webm"; let fileName = `quiz_${Date.now()}_q${i}_${t}.${ext}`; 
-await uploadToGitHubAPI(`data/${fileName}`, item.blobs[t], token); audioUrls[t] = `data/${fileName}`; 
-} 
-} else { audioUrls = { q: item.qSrc, correct: item.correctSrc, wrong1: item.wrong1Src, wrong2: item.wrong2Src }; } 
-quizJsonArray.push({ qText: item.qText, correctText: item.correctText, wrong1Text: item.wrong1Text, wrong2Text: item.wrong2Text, qSrc: audioUrls.q, correctSrc: audioUrls.correct, wrong1Src: audioUrls.wrong1, wrong2Src: audioUrls.wrong2 }); 
-} 
+    let item = quizMemory[i]; let audioUrls = {}; 
+    
+    // വോയ്സ് ബ്ലോബുകൾ ലഭ്യമാണെങ്കിൽ മാത്രം ഗിറ്റ്ഹബ്ബിലേക്ക് ഫയൽ അപ്‌ലോഡ് ചെയ്യുക
+    if(item.isNew && item.blobs && item.blobs.q && item.blobs.correct) { 
+        document.getElementById('loadText').innerText = `🎙️ ക്വിസ്സ് ചോദ്യം ${i + 1} ഓഡിയോകൾ അപ്‌ലോഡ് ചെയ്യുന്നു...`; 
+        let types = ['q', 'correct', 'wrong1', 'wrong2']; 
+        for(let t of types) { 
+            if(item.blobs[t]) {
+                let ext = item.blobs[t].type.includes("mp4") ? "mp4" : "webm"; let fileName = `quiz_${Date.now()}_q${i}_${t}.${ext}`; 
+                await uploadToGitHubAPI(`data/${fileName}`, item.blobs[t], token); audioUrls[t] = `data/${fileName}`; 
+            } else {
+                audioUrls[t] = "";
+            }
+        } 
+    } else { 
+        audioUrls = { q: item.qSrc || "", correct: item.correctSrc || "", wrong1: item.wrong1Src || "", wrong2: item.wrong2Src || "" }; 
+    } 
+    quizJsonArray.push({ qText: item.qText, correctText: item.correctText, wrong1Text: item.wrong1Text, wrong2Text: item.wrong2Text, qSrc: audioUrls.q, correctSrc: audioUrls.correct, wrong1Src: audioUrls.wrong1, wrong2Src: audioUrls.wrong2 }); 
+}
 let finalQuizOutput = { version: Date.now(), quizInfo: infoObj, questions: quizJsonArray }; 
 let quizBlob = new Blob([JSON.stringify(finalQuizOutput, null, 2)], {type: "application/json"}); 
 await uploadToGitHubAPI("data/quiz_data.json", quizBlob, token); 
