@@ -179,13 +179,23 @@ audio { margin-top: 5px; display: none; width: 100%; }
 
 <div id="section-quiz" class="admin-box" style="border-top: 4px solid #e67e22; display: none;"> 
 <h2>📝 ക്വിസ്സ് മാനേജർ <span class="page-badge" id="quizCountBadge">ആകെ ചോദ്യങ്ങൾ: 0</span> </h2> 
+
 <div class="section" style="background: #fff3e0; border-color: #ffe0b2;"> 
 <h4>📚 നിലവിലുള്ള ചോദ്യങ്ങളുടെ ലിസ്റ്റ്:</h4> 
-<div id="existingQuizList" style="max-height: 150px; overflow-y: auto; background: #fff; padding: 5px; border-radius: 4px; border: 1px solid #ffcc80;"></div> 
+<div id="existingQuizList" style="max-height: 180px; overflow-y: auto; background: #fff; padding: 5px; border-radius: 4px; border: 1px solid #ffcc80;"></div> 
 </div> 
 
-<div class="section"> 
-<h4>🆕 പുതിയ ക്വിസ് ചോദ്യം ചേർക്കുക:</h4> 
+<div class="section" style="background: #e8f4fd; border-color: #bce0fd;">
+<h4>📦 ഒറ്റയടിക്ക് ഒരുപാട് ചോദ്യങ്ങൾ ചേർക്കുക (Bulk Import):</h4>
+<p style="font-size:11px; color:#555; margin:0 0 5px 0;">ചോദ്യം | ശരിയുത്തരം | തെറ്റായ ഉത്തരം 1 | തെറ്റായ ഉത്തരം 2 എന്ന രീതിയിൽ താഴെ വരിവരിയായി പേസ്റ്റ് ചെയ്യുക:</p>
+<textarea id="bulkQuizInput" style="min-height: 120px; font-size: 13px;" placeholder="വുളൂഇന്റെ ഫർളുകൾ എത്ര? | 6 | 4 | 5&#10;വുളൂഅ് ചെയ്യൽ നിർബന്ധമായത് എന്തിന്? | നിസ്കാരത്തിന് | ഉറങ്ങാൻ | ഭക്ഷണം കഴിക്കാൻ"></textarea>
+<button type="button" class="btn-blue" onclick="importBulkQuizzes()">⚡ എല്ലാ ചോദ്യങ്ങളും ലിസ്റ്റിലേക്ക് ചേർക്കുക</button>
+</div>
+
+<div class="section" style="background: #fdfefe; border: 1px solid #ccc;"> 
+<h4 id="quizFormTitle">🆕 പുതിയ ക്വിസ് ചോദ്യം ചേർക്കുക:</h4> 
+<input type="hidden" id="editingQuizIndex" value="">
+
 <div class="audio-row">
 <div class="audio-title">🎙️ 1. ചോദ്യം (Question):</div>
 <input type="text" id="text_q" placeholder="ചോദ്യം ഇവിടെ എഴുതുക...">
@@ -221,9 +231,11 @@ audio { margin-top: 5px; display: none; width: 100%; }
 <p class="status-text" id="status_wrong2"></p> 
 <audio id="playback_wrong2" controls></audio>
 </div>
-<button type="button" class="btn-orange" style="margin-top:10px;" onclick="addQuizToMemory()">➕ ഈ ചോദ്യം ലിസ്റ്റിലേക്ക് മാറ്റുക</button> 
+<button type="button" class="btn-orange" id="btnSaveQuiz" style="margin-top:10px;" onclick="addQuizToMemory()">➕ ഈ ചോദ്യം ലിസ്റ്റിലേക്ക് മാറ്റുക</button> 
+<button type="button" class="btn-stop" id="btnCancelQuizEdit" style="background:#7f8c8d; margin-top:5px;" onclick="clearQuizForm()">❌ ഒഴിവാക്കുക</button> 
 </div> 
-</div> 
+</div>
+
 
 <div id="section-liveword" class="admin-box" style="border-top: 4px solid #2ecc71; display: none;">
 <h2>⚙️ വേർഡ് ആപ്പ് ലൈവ് മാനേജർ</h2>
