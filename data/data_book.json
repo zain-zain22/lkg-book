@@ -1,5 +1,5 @@
 {
-  "version": 1783328334592,
+  "version": 1792499307880,
   "globalInfo": {
     "class": "Lkg",
     "subject": "",
@@ -4437,6 +4437,28 @@
               }
             ]
           ]
+        },
+        {
+          "coords": {
+            "left": 0,
+            "top": 0,
+            "width": 15,
+            "height": 6
+          },
+          "text": "",
+          "audioSrc": "data/audio_1792499302415_p0_z5.mp3",
+          "writingPaths": null
+        },
+        {
+          "coords": {
+            "left": 0,
+            "top": 0,
+            "width": 15,
+            "height": 6
+          },
+          "text": "",
+          "audioSrc": "data/audio_1792499305072_p0_z6.mp3",
+          "writingPaths": null
         }
       ],
       "readingPaths": [
